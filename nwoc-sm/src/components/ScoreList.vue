@@ -1,19 +1,13 @@
-<template><!--
-  <v-list>
-    <score-item
-      v-for="score in scores"
-      :key="score.id"
-      :score="score"
-    >
-    </score-item>
-  </v-list>-->
+<template>
   <v-data-table
+    :search="searchText"
     :headers="headers"
     :items="scores"
-    :items-per-page="20"
+    :items-per-page="itemsPerPage"
     :sort-by="sortBy"
     multi-sort
     dense
+    :loading="scores.length <= 0"
   />
 </template>
 
@@ -33,6 +27,7 @@ export default class ScoreList extends Vue {
   addresses: IAdresses = {}
   scores: IScore[] = []
 
+  searchText = ''
   headers = [
     { text: '正式名', value: 'name'},
     { text: '別名', value: 'otherName'},
@@ -43,6 +38,15 @@ export default class ScoreList extends Vue {
     { text: '備考', value: 'note'}
   ]
   sortBy = ['name', 'publisher']
+
+  get width() {
+    return window.innerWidth
+  }
+  get itemsPerPage() {
+    return (this.width < 600)? 10:
+           (this.width < 800)? 20:
+           100
+  }
   
   mounted() {
     const db = firebase.firestore()

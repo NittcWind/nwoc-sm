@@ -36,12 +36,6 @@
       <v-container
         fluid
       >
-        <v-select
-          label="ソート"
-          :items="['曲名', '保管場所', '年', '出版社', '歌手']"
-          prepend-icon="mdi-sort-variant"
-        >
-        </v-select>
         <score-list />
       </v-container>
     </v-content>
