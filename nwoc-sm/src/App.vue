@@ -29,7 +29,6 @@
       </v-spacer>
       <new-button />
       <account-button />
-      <search-button />
     </v-app-bar>
 
     <v-content>

@@ -110,12 +110,10 @@ export default class AccountButton extends Vue {
   login() {
     this.loading = true
     this.auth.signInWithEmailAndPassword(this.email, this.password).then(user => {
-      console.log(user)
       this.loading = false
       this.dialog = false
     }).catch(err => {
       this.loading = true
-      console.error(err)
     })
   }
 

@@ -1,14 +1,33 @@
 <template>
-  <v-data-table
-    :search="searchText"
-    :headers="headers"
-    :items="scores"
-    :items-per-page="itemsPerPage"
-    :sort-by="sortBy"
-    multi-sort
-    dense
-    :loading="scores.length <= 0"
-  />
+  <div
+    class="pa-2"
+  >
+    <v-container
+      fluid
+    >
+      <v-row>
+        <v-spacer />
+        <v-text-field
+          v-model="searchText"
+          append-icon="mdi-magnify"
+          label="検索"
+          single-line
+          dense
+        />
+      </v-row>
+    </v-container>
+    <v-data-table
+      :search="searchText"
+      :headers="headers"
+      :items="scores"
+      :items-per-page="30"
+      :sort-by="sortBy"
+      :mobile-breakpoint="mobileBreakpoint"
+      multi-sort
+      dense
+      :loading="scores.length <= 0"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -27,6 +46,7 @@ export default class ScoreList extends Vue {
   addresses: IAdresses = {}
   scores: IScore[] = []
 
+  mobileBreakpoint = 800
   searchText = ''
   headers = [
     { text: '正式名', value: 'name'},
@@ -38,14 +58,10 @@ export default class ScoreList extends Vue {
     { text: '備考', value: 'note'}
   ]
   sortBy = ['name', 'publisher']
+  width = window.innerWidth
 
-  get width() {
-    return window.innerWidth
-  }
-  get itemsPerPage() {
-    return (this.width < 600)? 10:
-           (this.width < 800)? 20:
-           100
+  handleResize() {
+    this.width = window.innerWidth
   }
   
   mounted() {
