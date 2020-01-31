@@ -37,14 +37,10 @@
     db.collection('scores').orderBy('name').get().then(querySnapshot => {
       querySnapshot.forEach(async doc => {
         const data = doc.data()
-        const addressDoc = await data.address.get()
-        const address = (addressDoc.exists)? addressDoc.data(): ''
-        const publisherDoc = await data.publisher.get()
-        const publisher = (publisherDoc.exists)? publisherDoc.data(): ''
         $scores.insertAdjacentHTML('beforeend', `
           <li>
             <h3>${data.name}</h3>
-            <p>${data.otherName}, ${address.address}, ${publisher.name}, ${data.year}, ${data.singer}, ${data.note}</p>
+            <p>${data.otherName}, ${data.year}, ${data.singer}, ${data.note}</p>
           </li>
         `)
       })

@@ -8,9 +8,9 @@
 </head>
 <body>
   <form id="form">
-    <p><input type="text" placeholder="正式名" id="name"></p>
+    <p><input type="text" placeholder="正式名" id="name" required></p>
     <p><input type="text" placeholder="別名" id="otherName"></p>
-    <p>しまってあるとこ: <select id="address"></select></p>
+    <p>しまってあるとこ: <select id="address" required></select></p>
     <p id="publisherWrap">出版: <select id="publisher"></select></p>
     <p id="yearWrap"><input type="number" placeholder="年" id="year" min="1940" max="2200"></p>
     <p><input type="text" placeholder="歌手" id="singer"></p>
@@ -89,12 +89,12 @@
       e.preventDefault()
       
       db.collection('scores').add({
-        name: $name.value,
-        otherName: $otherName.value,
+        name: $name.value.replace('　', ' '),
+        otherName: $otherName.value.replace('　', ' '),
         address: db.collection('addresses').doc($address.value),
         publisher: (!isKadaikyoku())? db.collection('publishers').doc($publisher.value): null,
         year: (isKadaikyoku())? $year.value: null,
-        singer: $singer.value,
+        singer: $singer.value.replace('　', ' '),
         note: $note.value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
