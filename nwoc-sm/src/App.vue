@@ -10,7 +10,6 @@
     <v-app-bar
       app
     >
-      <!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer" /> -->
       <v-btn
         icon
         text
@@ -28,10 +27,9 @@
       </v-toolbar-title>
       <v-spacer>
       </v-spacer>
-      <account-button>
-      </account-button>
-      <search-button>
-      </search-button>
+      <new-button />
+      <account-button />
+      <search-button />
     </v-app-bar>
 
     <v-content>
@@ -55,12 +53,14 @@ import { Component, Vue } from 'vue-property-decorator'
 import ScoreList from './components/ScoreList.vue'
 import AccountButton from './components/AccountButton.vue'
 import SearchButton from './components/SearchButton.vue'
+import NewButton from './components/NewButton.vue'
 
 @Component({
   components: {
     ScoreList,
     AccountButton,
-    SearchButton
+    SearchButton,
+    NewButton
   }
 })
 export default class App extends Vue {

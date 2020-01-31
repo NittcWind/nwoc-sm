@@ -1,6 +1,6 @@
 <template>
   <v-list-item
-    @click.stop="dialog = !dialog"
+    @click.stop="openDialog"
   >
     <v-list-item-content>
       <v-list-item-title>
@@ -67,6 +67,16 @@
             </v-list-item>
           </v-list>
         </v-card-text>
+        <v-card-actions
+          v-if="!!userEmail"
+        >
+          <v-spacer />
+          <v-btn
+            text
+          >
+            Edit
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-list-item>
@@ -75,10 +85,20 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { IScore } from '../types'
+import * as firebase from 'firebase/app'
+import 'firebase/auth'
 
 @Component
 export default class ScoreItem extends Vue {
   @Prop({ required: true }) score!: IScore
   dialog: boolean = false
+  auth = firebase.auth()
+  userEmail = ''
+
+  openDialog() {
+    this.dialog = !this.dialog
+    const currentUser = this.auth.currentUser
+    if (currentUser !== null && currentUser.email !== null) this.userEmail = currentUser.email
+  }
 }
 </script>

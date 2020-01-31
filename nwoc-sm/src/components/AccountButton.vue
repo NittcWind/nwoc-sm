@@ -18,41 +18,43 @@
       v-if="!userEmail"
       :max-width="maxWidth"
     >
-      <v-list>
-        <v-list-item>
-          <v-text-field
-            v-model="email"
-            type="email"
-            label="Email"
-            :rules="[required]"
-          />
-        </v-list-item>
-        <v-list-item>
-          <v-text-field
-            v-model="password"
-            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="showPassword ? 'text' : 'password'"
-            :rules="[required]"
-            label="Password"
-            @click:append="showPassword = !showPassword"
-          />
-        </v-list-item>
-      </v-list>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn
-          text
-          @click="login"
-        >
-          Log in
-        </v-btn>
-      </v-card-actions>
-      <v-progress-linear
-        bottom
-        absolute
-        :active="loading"
-        :indeterminate="loading"
-      />
+      <v-form @submit.prevent="login">
+        <v-list>
+          <v-list-item>
+            <v-text-field
+              v-model="email"
+              type="email"
+              label="Email"
+              :rules="[required]"
+            />
+          </v-list-item>
+          <v-list-item>
+            <v-text-field
+              v-model="password"
+              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="showPassword ? 'text' : 'password'"
+              :rules="[required]"
+              label="Password"
+              @click:append="showPassword = !showPassword"
+            />
+          </v-list-item>
+        </v-list>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            type="submit"
+            text
+          >
+            Log in
+          </v-btn>
+        </v-card-actions>
+        <v-progress-linear
+          bottom
+          absolute
+          :active="loading"
+          :indeterminate="loading"
+        />
+      </v-form>
     </v-card>
     <v-card
       v-else
@@ -63,6 +65,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
+          type="submit"
           text
           @click="logout"
         >

@@ -1,5 +1,7 @@
 <template>
-  <v-dialog>
+  <v-dialog
+    :max-width="maxWidth"
+  >
     <template v-slot:activator="{ on }">
       <v-btn
         text
@@ -10,9 +12,17 @@
       </v-btn>
     </template>
 
-    <v-card>
+    <v-card
+      :max-width="maxWidth"
+    >
+      <v-card-title>
+        Search score
+      </v-card-title>
       <v-card-text>
-        <v-text-field>
+        <v-text-field
+          class="ma-1"
+          append-icon="mdi-magnify"
+        >
         </v-text-field>
       </v-card-text>
     </v-card>
@@ -23,5 +33,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 
 @Component
-export default class SearchButton extends Vue {}
+export default class SearchButton extends Vue {
+  maxWidth = 600
+}
 </script>

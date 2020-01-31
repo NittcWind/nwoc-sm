@@ -1,4 +1,4 @@
-<template>
+<template><!--
   <v-list>
     <score-item
       v-for="score in scores"
@@ -6,7 +6,15 @@
       :score="score"
     >
     </score-item>
-  </v-list>
+  </v-list>-->
+  <v-data-table
+    :headers="headers"
+    :items="scores"
+    :items-per-page="20"
+    :sort-by="sortBy"
+    multi-sort
+    dense
+  />
 </template>
 
 <script lang="ts">
@@ -24,6 +32,17 @@ export default class ScoreList extends Vue {
   publishers: IPublishers = {}
   addresses: IAdresses = {}
   scores: IScore[] = []
+
+  headers = [
+    { text: '正式名', value: 'name'},
+    { text: '別名', value: 'otherName'},
+    { text: '保管場所', value: 'address'},
+    { text: '年', value: 'year'},
+    { text: '出版社', value: 'publisher'},
+    { text: '歌手', value: 'singer'},
+    { text: '備考', value: 'note'}
+  ]
+  sortBy = ['name', 'publisher']
   
   mounted() {
     const db = firebase.firestore()
