@@ -12,8 +12,11 @@
     </v-list-item-content>
     <v-dialog
       v-model="dialog"
+      max-width="640"
     >
-      <v-card>
+      <v-card
+        max-width="640"
+      >
         <v-card-title>
           {{ score.name }}
         </v-card-title>
