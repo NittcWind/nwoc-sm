@@ -7,7 +7,8 @@
     "predeploy": [
       "npm --prefix \"$RESOURCE_DIR\" run lint",
       "npm --prefix \"$RESOURCE_DIR\" run build"
-    ]
+    ],
+    "source": "functions"
   },
   "hosting": {
     "public": "nwoc-sm/dist",
@@ -19,5 +20,8 @@
     "predeploy": [
       "./buildvue.sh"
     ]
+  },
+  "database": {
+    "rules": "database.rules.json"
   }
 }
