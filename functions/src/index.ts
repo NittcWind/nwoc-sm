@@ -12,8 +12,19 @@ admin.initializeApp({
   storageBucket: 'nwoc-sm.appspot.com'
 })
 const firestore = admin.firestore()
+const database = admin.database()
 const bucket = admin.storage().bucket()
 
+interface IScore {
+  [key: string]: string|undefined|number
+  name: string
+  otherName?: string
+  address: string
+  year?: number
+  publisher?: string
+  singer?: string
+  note?: string
+}
 interface IScores {
   [key: string]: object
 }
@@ -21,36 +32,32 @@ interface IStringKeyValue {
   [key: string]: string
 }
 
-exports.backup = functions.https.onRequest((req, res) => {
-  const publishers: IStringKeyValue = {}
-  const addresses: IStringKeyValue = {}
-
-  firestore.collection('publishers').get().then(querySnapshot => {
-    querySnapshot.forEach(doc => {
-      publishers[doc.id] = doc.data().name
-    })
-  }).catch(err => {
-    res.statusCode = 500
-    res.send('<p>Publisher error</p>')
-    res.send(err)
-    res.end()
-  })
-  firestore.collection('addresses').get().then(querySnapshot => {
-    querySnapshot.forEach(doc => {
-      addresses[doc.id] = doc.data().address
-    })
-  }).catch(err => {
-    res.statusCode = 500
-    res.send('<p>Addresses error</p>')
-    res.send(err)
-    res.end()
-  })
-
+// Firestoreからdatabaseとstorageにバックアップする
+exports.backup = functions.https.onRequest(async (req, res) => {
+  let statusCode = 200
+  // 一時保管ファイルとそのディレクトリ
   const tmpDitPath = os.tmpdir()
   const tmpFilePath = path.join(tmpDitPath, 'tmp.json')
-  const obj: IScores = {}
-  firestore.collection('scores').get().then(querySnapshot => {
-    querySnapshot.forEach(doc => {
+  // databaseの保存先
+  const scoresRef = database.ref('scores')
+
+  try {
+    // 出版社と保管場所は参照で保存してるので参照を解決する
+    const publishers: IStringKeyValue = {}  // 出版社
+    const addresses: IStringKeyValue = {}   // 保管場所
+    const pubSnap = await firestore.collection('publishers').get()
+    pubSnap.forEach(doc => {
+      publishers[doc.id] = doc.data().name
+    })
+    const adrSnap = await firestore.collection('addresses').get()
+    adrSnap.forEach(doc => {
+      addresses[doc.id] = doc.data().address
+    })
+
+    // 一覧を取得
+    const scores: IScores = {}
+    const scoreSnap = await firestore.collection('scores').get()
+    scoreSnap.forEach(async doc => {
       const data = doc.data()
       const address = addresses[data.address.id]
       let year,publisher
@@ -59,7 +66,7 @@ exports.backup = functions.https.onRequest((req, res) => {
       } else {
         publisher = publishers[data.publisher.id]
       }
-      obj[doc.id] = {
+      const score: IScore = {
         name: data.name,
         otherName: data.otherName,
         address: address,
@@ -68,24 +75,29 @@ exports.backup = functions.https.onRequest((req, res) => {
         singer: data.singer,
         note: data.note
       }
-    })
-    res.send(`<p>${JSON.stringify(obj)}</p>`)
+      // remove undefined value
+      Object.keys(score).forEach(key => score[key] === undefined && delete score[key])
+      scores[doc.id] = score
 
-    fs.writeFileSync(tmpFilePath, JSON.stringify(obj))
-    return bucket.upload(tmpFilePath, {
+      await scoresRef.child(doc.id).set(score).catch(console.error)
+    })
+    //res.send(`<p>${JSON.stringify(obj)}</p>`)
+
+    // Storageにアップロード
+    fs.writeFileSync(tmpFilePath, JSON.stringify(scores))
+    await bucket.upload(tmpFilePath, {
       destination: 'backup/scores.json',
       metadata: { contentType: 'application/json' }
     })
-  }).then(val => {
-    res.statusCode = 200
-    res.send('<p>Complete</p>')
-    res.end()
-    fs.unlinkSync(tmpFilePath)
-  }).catch(err => {
-    res.statusCode = 500 
+  } catch (err) {
+    console.log(err)
+    // エラーが発生したらサーバーエラー(500)で終了
+    statusCode = 500
     res.send('<p>Error</p>')
-    res.send(err)
+    res.send(`<p>${JSON.stringify(err)}</p>`)
+  } finally {
+    if (fs.existsSync(tmpFilePath)) fs.unlinkSync(tmpFilePath)
+    res.status(statusCode)
     res.end()
-    fs.unlinkSync(tmpFilePath)
-  })
+  }
 })
