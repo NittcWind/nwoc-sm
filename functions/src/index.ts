@@ -15,6 +15,8 @@ const firestore = admin.firestore()
 const database = admin.database()
 const bucket = admin.storage().bucket()
 
+const scoresJsonPath = 'backup/scores.json'
+
 interface IScore {
   [key: string]: string|undefined|number
   name: string
@@ -33,7 +35,7 @@ interface IStringKeyValue {
 }
 
 // Firestoreからdatabaseとstorageにバックアップする
-exports.backup = functions.https.onRequest(async (req, res) => {
+const backup = async (req: functions.https.Request, res: functions.Response) => {
   let statusCode = 200
   let content: string | object = ''
   // 一時保管ファイルとそのディレクトリ
@@ -87,7 +89,7 @@ exports.backup = functions.https.onRequest(async (req, res) => {
     const json = JSON.stringify(scores)
     fs.writeFileSync(tmpFilePath, json)
     await bucket.upload(tmpFilePath, {
-      destination: 'backup/scores.json',
+      destination: scoresJsonPath,
       metadata: { contentType: 'application/json' }
     })
     content = scores
@@ -103,4 +105,28 @@ exports.backup = functions.https.onRequest(async (req, res) => {
     res.status(statusCode)
     res.end()
   }
+}
+
+// /backup にアクセスしてバックアップ生成
+exports.backup = functions.https.onRequest(backup)
+
+// /json にアクセスしてStorageからjsonでリスト取得
+exports.json = functions.https.onRequest(async (req, res) => {
+  const file = bucket.file(scoresJsonPath)
+  const [ exists ] = await file.exists()
+
+  // ファイルが存在しない場合，buckupして生成
+  if (!exists) {
+    backup(req, res)
+    return
+  }
+
+  const [ content ] = await file.download()
+  res.set('Content-Type', 'application/json')
+  res.send(content)
+  res.status(200)
+  res.end()
 })
+
+// /csv にアクセスしてStorageからcsvでリスト取得
+exports.csv = functions.https.onRequest(async (req, res) => {})
