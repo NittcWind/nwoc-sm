@@ -35,6 +35,7 @@ interface IStringKeyValue {
 // Firestoreからdatabaseとstorageにバックアップする
 exports.backup = functions.https.onRequest(async (req, res) => {
   let statusCode = 200
+  let content: string | object = ''
   // 一時保管ファイルとそのディレクトリ
   const tmpDitPath = os.tmpdir()
   const tmpFilePath = path.join(tmpDitPath, 'tmp.json')
@@ -79,24 +80,26 @@ exports.backup = functions.https.onRequest(async (req, res) => {
       Object.keys(score).forEach(key => score[key] === undefined && delete score[key])
       scores[doc.id] = score
 
-      await scoresRef.child(doc.id).set(score).catch(console.error)
+      await scoresRef.child(doc.id).set(score)
     })
-    //res.send(`<p>${JSON.stringify(obj)}</p>`)
 
     // Storageにアップロード
-    fs.writeFileSync(tmpFilePath, JSON.stringify(scores))
+    const json = JSON.stringify(scores)
+    fs.writeFileSync(tmpFilePath, json)
     await bucket.upload(tmpFilePath, {
       destination: 'backup/scores.json',
       metadata: { contentType: 'application/json' }
     })
+    content = scores
   } catch (err) {
-    console.log(err)
+    console.error(err)
     // エラーが発生したらサーバーエラー(500)で終了
     statusCode = 500
-    res.send('<p>Error</p>')
-    res.send(`<p>${JSON.stringify(err)}</p>`)
+    content = `<h1>Error</h1><p>${JSON.stringify(err)}</p>`
   } finally {
     if (fs.existsSync(tmpFilePath)) fs.unlinkSync(tmpFilePath)
+    res.set('Content-Type', (typeof content === 'object')? 'application/json': 'text/html')
+    res.send(content)
     res.status(statusCode)
     res.end()
   }
