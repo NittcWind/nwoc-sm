@@ -2,20 +2,6 @@
   <div
     class="pa-2"
   >
-    <v-container
-      fluid
-    >
-      <v-row>
-        <v-spacer />
-        <v-text-field
-          v-model="searchText"
-          append-icon="mdi-magnify"
-          label="検索"
-          single-line
-          dense
-        />
-      </v-row>
-    </v-container>
     <v-data-table
       :search="searchText"
       :headers="headers"
@@ -30,7 +16,127 @@
         disableItemsPerPage: true,
         itemsPerPageOptions: [minItemsPerPage,maxItemsPerPage]
       }"
-    />
+    >
+      <template v-slot:top>
+        <v-toolbar
+          flat
+          dense
+        >
+          <v-dialog v-model="dialog" persistent :max-width="maxWidth">
+            <template v-slot:activator="{ on }">
+              <v-btn
+                class="mb-2"
+                color="primary"
+                v-on="on"
+              >
+                New
+              </v-btn>
+            </template>
+            <v-card>
+              <v-progress-linear
+                top
+                absolute
+                :active="loading"
+                :indeterminate="loading"
+              />
+              <v-card-title>
+                <v-text-field
+                  required
+                  label="正式名"
+                  v-model="editItem.name"
+                />
+              </v-card-title>
+              <v-card-text>
+                <v-text-field
+                  label="別名"
+                  v-model="editItem.otherName"
+                />
+                <v-select
+                  required
+                  label="保管場所"
+                  :items="addresses"
+                  item-text="name"
+                  item-value="id"
+                  v-model="editItem.address"
+                />
+                <v-select
+                  v-if="!isKadaikyoku"
+                  label="出版社"
+                  :items="publishers"
+                  item-text="name"
+                  item-value="id"
+                  v-model="editItem.publisher"
+                />
+                <v-text-field
+                  v-if="isKadaikyoku"
+                  type="number"
+                  label="年"
+                  min="1940" max="2200"
+                  v-model="editItem.year"
+                />
+                <v-text-field
+                v-if="!isKadaikyoku"
+                  label="歌手"
+                  v-model="editItem.singer"
+                />
+                <v-textarea
+                  label="備考"
+                  v-model="editItem.note"
+                />
+                <v-alert
+                  v-if="!!errMsg"
+                  dense
+                  outlined
+                  type="error"
+                >
+                  {{ errMsg }}
+                </v-alert>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="close"
+                >
+                  Cancel
+                </v-btn>
+                <v-spacer />
+                <v-btn
+                  text
+                  color="primary"
+                  @click="save"
+                >
+                  OK
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <v-spacer />
+          <v-text-field
+            v-model="searchText"
+            append-icon="mdi-magnify"
+            label="検索"
+            single-line
+            dense
+          />
+        </v-toolbar>
+      </template>
+      <template v-slot:item.action="{ item }">
+        <v-icon
+          small
+          class="mr-2"
+          @click="editScore(item)"
+        >
+          mdi-pencil
+        </v-icon>
+        <v-icon
+          small
+          @click="deleteScore(item)"
+        >
+          mdi-delete
+        </v-icon>
+      </template>
+      <template v-slot:no-data>NO DATA</template>
+    </v-data-table>
   </div>
 </template>
 
@@ -46,11 +152,51 @@ import { IScore, IAdresses, IPublishers } from '../types'
   }
 })
 export default class ScoreList extends Vue {
-  publishers: IPublishers = {}
-  addresses: IAdresses = {}
+  publishers: IPublishers[] = []
+  addresses: IAdresses[] = []
   scores: IScore[] = []
 
-  mobileBreakpoint = 800
+  id2name(arr: IPublishers[] | IAdresses[], id: string = ''): string {
+    const target = arr.find(val => val.id === id)
+    return (target && target.name) || ''
+  }
+  name2id(arr: IPublishers[] | IAdresses[], name: string = ''): string {
+    const target = arr.find(val => val.name === name)
+    return (target && target.id) || ''
+  }
+
+  // edit dialog variables(constants)
+  loading = false
+  maxWidth = 640
+  dialog = false
+  editTargetId = ''
+  editItem = {
+    name: '',
+    otherName: '',
+    address: '',
+    publisher: '',
+    year: (new Date()).getFullYear(),
+    singer: '',
+    note: ''
+  }
+  defaultItem = {
+    name: '',
+    otherName: '',
+    address: '',
+    publisher: '',
+    year: (new Date()).getFullYear(),
+    singer: '',
+    note: ''
+  }
+  errMsg = ''
+  kadaikyokuAddress = ''
+  db = firebase.firestore()
+  get isKadaikyoku() {
+    return this.kadaikyokuAddress === this.editItem.address
+  }
+
+  // table valiables(constants)
+  mobileBreakpoint = 640
   minItemsPerPage = 10
   maxItemsPerPage = 50
   searchText = ''
@@ -61,11 +207,11 @@ export default class ScoreList extends Vue {
     { text: '年', value: 'year'},
     { text: '出版社', value: 'publisher'},
     { text: '歌手', value: 'singer'},
-    { text: '備考', value: 'note'}
+    { text: '備考', value: 'note'},
+    { text: 'Actions', value: 'action', sortable: false }
   ]
   sortBy = ['name', 'publisher']
   width = window.innerWidth
-
   get itemsPerPage() {
     return (this.width < this.mobileBreakpoint)? this.minItemsPerPage: this.maxItemsPerPage
   }
@@ -74,42 +220,116 @@ export default class ScoreList extends Vue {
     this.width = window.innerWidth
   }
   
-  mounted() {
+  async mounted() {
+    // 表示数変更のためのリサイズイベント
     window.addEventListener('resize', this.handleResize)
 
-    const db = firebase.firestore()
-    db.collection('publishers').get().then(querySnapshot => {
+    // 保管場所と出版社は参照
+    this.db.collection('publishers').orderBy('name').get().then(querySnapshot => {
       querySnapshot.forEach(doc => {
-        this.$set(this.publishers, doc.id, doc.data().name)
-      })
-    })
-    db.collection('addresses').get().then(querySnapshot => {
-      querySnapshot.forEach(doc => {
-        this.$set(this.addresses, doc.id, doc.data().address)
-      })
-    })
-    db.collection('scores').orderBy('name').get().then(querySnapshot => {
-      querySnapshot.forEach(doc => {
-        const data = doc.data()
-        const address = this.addresses[data.address.id]
-        let year,publisher
-        if (address === '課題曲') {
-          year = data.year
-        } else {
-          publisher = this.publishers[data.publisher.id]
-        }
-        this.scores.push({
+        this.publishers.push({
           id: doc.id,
-          name: data.name as string,
-          otherName: data.otherName as string,
-          address: address,
-          year: year,
-          publisher: publisher,
-          singer: data.singer,
-          note: data.note
+          name: doc.data().name
         })
       })
     })
+    this.db.collection('addresses').orderBy('address').get().then(querySnapshot => {
+      querySnapshot.forEach(doc => {
+        const address = doc.data().address
+        if (address === '課題曲') this.kadaikyokuAddress = doc.id
+        this.addresses.push({
+          id: doc.id,
+          name: address
+        })
+      })
+    })
+
+    // 一覧取得
+    let json = await fetch('/json').then(res => {
+      return res.json()
+    }).then(json => {
+      json = json as object || {}
+      Object.keys(json).forEach(key => {
+        const score = json[key]
+        if (typeof score !== 'object') return
+        this.scores.push(Object.assign(score, { id: key }))
+      })
+    }).catch(err => {
+      this.scores.push({
+        id: 'error',
+        name: 'error',
+        address: 'error'
+      })
+    })
+  }
+
+  editScore(score: IScore) {
+    this.editTargetId = score.id
+    this.editItem = {
+      name: score.name,
+      otherName: score.otherName || '',
+      address: this.name2id(this.addresses, score.address),
+      publisher: this.name2id(this.publishers, score.publisher),
+      year: score.year || (new Date().getFullYear()),
+      singer: score.singer || '',
+      note: score.note || ''
+    }
+    this.dialog = true
+  }
+
+  close() {
+    this.dialog = false
+    this.errMsg = ''
+    setTimeout(() => {
+      this.editTargetId = ''
+      this.editItem = Object.assign({}, this.defaultItem)
+    }, 100)
+  }
+
+  async save() {
+    this.loading = true
+    const score = {
+      name: this.editItem.name,
+      otherName: this.editItem.otherName,
+      address: this.db.collection('addresses').doc(this.editItem.address),
+      publisher: (!this.isKadaikyoku)? this.db.collection('publishers').doc(this.editItem.publisher): null,
+      year: (this.isKadaikyoku)? this.editItem.year: null,
+      singer: (!this.isKadaikyoku)? this.editItem.singer: '',
+      note: this.editItem.note
+    }
+    try {
+      if (this.editTargetId === '') {
+        const doc = await this.db.collection('scores').add(Object.assign(score, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
+        this.scores.push({
+          id: doc.id,
+          name: this.editItem.name,
+          otherName: this.editItem.otherName,
+          address: this.id2name(this.addresses, this.editItem.address),
+          publisher: (!this.isKadaikyoku)? this.id2name(this.publishers, this.editItem.publisher): undefined,
+          year: (this.isKadaikyoku)? this.editItem.year: undefined,
+          singer: (!this.isKadaikyoku)? this.editItem.singer: '',
+          note: this.editItem.note
+        })
+      } else {
+        await this.db.collection('scores').doc(this.editTargetId).set(Object.assign(score, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
+        this.scores.splice(this.scores.findIndex(val => val.id === this.editTargetId), 1)
+        this.scores.push({
+          id: this.editTargetId,
+          name: this.editItem.name,
+          otherName: this.editItem.otherName,
+          address: this.id2name(this.addresses, this.editItem.address),//this.addresses.find(val => val.id === this.editItem.address).name,
+          publisher: (!this.isKadaikyoku)? this.id2name(this.publishers, this.editItem.publisher): undefined,
+          year: (this.isKadaikyoku)? this.editItem.year: undefined,
+          singer: (!this.isKadaikyoku)? this.editItem.singer: '',
+          note: this.editItem.note
+        })
+      }
+      this.close()
+    } catch (err) {
+      this.errMsg = err.message
+    } finally {
+      this.loading = false
+    }
   }
 }
 </script>
