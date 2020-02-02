@@ -155,6 +155,7 @@ exports.backup = functions.https.onRequest(async (req, res) => {
 exports.json = functions.https.onRequest(async (req, res) => {
   const scores = await getScoreList()
 
+  res.set('Content-Disposition', 'inline; filename="backup_scores.json"')
   res.set('Content-Type', 'application/json')
   res.send(scores)
   res.status(200)
@@ -173,14 +174,14 @@ exports.csv = functions.https.onRequest(async (req, res) => {
       encloseValueInQuotes(score.name),
       encloseValueInQuotes(score.otherName),
       encloseValueInQuotes(score.address),
-      encloseValueInQuotes(`${score.year}`),
+      encloseValueInQuotes((!score.year)? '': `${score.year}`),
       encloseValueInQuotes(score.publisher),
       encloseValueInQuotes(score.singer),
       encloseValueInQuotes(score.note)
     ].join(',')
   }).join('\n')
 
-  res.set('Content-Disposition', 'attachment; filename="backup_scores.csv"')
+  res.set('Content-Disposition', 'inline; filename="backup_scores.csv"')
   res.set('Content-Type', 'text/csv; charset=Shift_JIS')
   res.write(jconv.convert(csv, 'UTF8', 'SJIS'))
   res.status(200)
