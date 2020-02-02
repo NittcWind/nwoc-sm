@@ -20,12 +20,16 @@
       :search="searchText"
       :headers="headers"
       :items="scores"
-      :items-per-page="30"
+      :items-per-page="itemsPerPage"
       :sort-by="sortBy"
       :mobile-breakpoint="mobileBreakpoint"
       multi-sort
       dense
       :loading="scores.length <= 0"
+      :footer-props="{
+        disableItemsPerPage: true,
+        itemsPerPageOptions: [minItemsPerPage,maxItemsPerPage]
+      }"
     />
   </div>
 </template>
@@ -47,6 +51,8 @@ export default class ScoreList extends Vue {
   scores: IScore[] = []
 
   mobileBreakpoint = 800
+  minItemsPerPage = 10
+  maxItemsPerPage = 50
   searchText = ''
   headers = [
     { text: '正式名', value: 'name'},
@@ -60,11 +66,17 @@ export default class ScoreList extends Vue {
   sortBy = ['name', 'publisher']
   width = window.innerWidth
 
+  get itemsPerPage() {
+    return (this.width < this.mobileBreakpoint)? this.minItemsPerPage: this.maxItemsPerPage
+  }
+
   handleResize() {
     this.width = window.innerWidth
   }
   
   mounted() {
+    window.addEventListener('resize', this.handleResize)
+
     const db = firebase.firestore()
     db.collection('publishers').get().then(querySnapshot => {
       querySnapshot.forEach(doc => {
@@ -84,7 +96,7 @@ export default class ScoreList extends Vue {
         if (address === '課題曲') {
           year = data.year
         } else {
-          publisher = this.publishers[data.publishers.id]
+          publisher = this.publishers[data.publisher.id]
         }
         this.scores.push({
           id: doc.id,
@@ -93,6 +105,7 @@ export default class ScoreList extends Vue {
           address: address,
           year: year,
           publisher: publisher,
+          singer: data.singer,
           note: data.note
         })
       })
