@@ -12,6 +12,11 @@
   },
   "hosting": {
     "public": "nwoc-sm/dist",
+    "rewrites": [
+      { "source": "/backup", "function": "backup" },
+      { "source": "/json", "function": "json" },
+      { "source": "/csv", "function": "csv" }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",
