@@ -35,20 +35,27 @@ interface IStringKeyValue {
   [key: string]: string
 }
 
+const getIdValue = (collectionName: string, valName: string) => () => new Promise<IStringKeyValue>(async (resolve, reject) => {
+  try {
+    const obj: IStringKeyValue = {}
+    const docSnap = await firestore.collection(collectionName).get()
+    docSnap.forEach(doc => {
+      obj[doc.id] = doc.data()[valName]
+    })
+    resolve(obj)
+  } catch (err) {
+    reject(err)
+  }
+})
+const getPublishers = getIdValue('publishers', 'name')
+const getAddresses = getIdValue('addresses', 'address')
+
 // Firestoreから最新のスコア一覧を生成
 const makeScoreList = () => new Promise<IScoreList>(async (resolve, reject) => {
   try {
     // 出版社と保管場所は参照で保存してるので参照を解決する
-    const publishers: IStringKeyValue = {}  // 出版社
-    const addresses: IStringKeyValue = {}   // 保管場所
-    const pubSnap = await firestore.collection('publishers').get()
-    pubSnap.forEach(doc => {
-      publishers[doc.id] = doc.data().name
-    })
-    const adrSnap = await firestore.collection('addresses').get()
-    adrSnap.forEach(doc => {
-      addresses[doc.id] = doc.data().address
-    })
+    const publishers: IStringKeyValue = await getPublishers()
+    const addresses: IStringKeyValue = await getAddresses()
 
     // 一覧を取得
     const scores: IScoreList = {}
@@ -83,7 +90,9 @@ const makeScoreList = () => new Promise<IScoreList>(async (resolve, reject) => {
 })
 
 // Firestoreからdatabaseとstorageにバックアップする
-const backup = () => new Promise<IScoreList>(async (resolve, reject) => {
+const backup = (scores: IScoreList, backupTo = { database: true, storage: true }) => new Promise<IScoreList>(async (resolve, reject) => {
+  backupTo.database = (backupTo.database === false)? false: true
+  backupTo.storage = (backupTo.storage === false)? false: true
   // 一時保管ファイルとそのディレクトリ
   const tmpDitPath = os.tmpdir()
   const tmpFilePath = path.join(tmpDitPath, 'tmp.json')
@@ -91,16 +100,19 @@ const backup = () => new Promise<IScoreList>(async (resolve, reject) => {
   const scoresRef = database.ref('scores')
 
   try {
-    const scores = await makeScoreList()
-    // Realtime Databaseにアップロード
-    await scoresRef.set(scores)
-    // Storageにアップロード
-    const json = JSON.stringify(scores)
-    fs.writeFileSync(tmpFilePath, json)
-    await bucket.upload(tmpFilePath, {
-      destination: scoresJsonPath,
-      metadata: { contentType: 'application/json' }
-    })
+    if (backupTo.database) {
+      // Realtime Databaseにアップロード
+      await scoresRef.set(scores)
+    }
+    if (backupTo.storage) {
+      // Storageにアップロード
+      const json = JSON.stringify(scores)
+      fs.writeFileSync(tmpFilePath, json)
+      await bucket.upload(tmpFilePath, {
+        destination: scoresJsonPath,
+        metadata: { contentType: 'application/json' }
+      })
+    }
 
     resolve(scores)
   } catch (err) {
@@ -120,7 +132,7 @@ const getScoreList = () => new Promise<IScoreList>(async (resolve, reject) => {
 
     // ファイルが存在しない場合，buckupして生成
     if (!exists) {
-      scores = await backup()
+      scores = await backup(await makeScoreList())
     } else {
       const [ content ] = await file.download()
       scores = JSON.parse(content.toString()) as IScoreList
@@ -137,7 +149,7 @@ exports.backup = functions.https.onRequest(async (req, res) => {
   let content: string | object = ''
 
   try {
-    content = await backup()
+    content = await backup(await makeScoreList())
   } catch (err) {
     console.error(err)
     // エラーが発生したらサーバーエラー(500)で終了
@@ -186,4 +198,42 @@ exports.csv = functions.https.onRequest(async (req, res) => {
   res.write(jconv.convert(csv, 'UTF8', 'SJIS'))
   res.status(200)
   res.end()
+})
+
+// Firestoreの変更（楽譜の追加・編集）検知
+exports.updateBackup = functions.firestore.document('scores/{scoreId}').onWrite(async (change, context) => {
+  try {
+    // 出版社と保管場所は参照で保存してるので参照を解決する
+    const publishers: IStringKeyValue = await getPublishers()
+    const addresses: IStringKeyValue = await getAddresses()
+
+    const data = change.after.data()
+    if (typeof data === 'undefined') return
+    const address = addresses[data.address.id]
+    let year,publisher
+    if (address === '課題曲') {
+      year = data.year
+    } else {
+      publisher = publishers[data.publisher.id]
+    }
+    const score: IScore = {
+      name: data.name,
+      otherName: data.otherName,
+      address: address,
+      year: year,
+      publisher: publisher,
+      singer: data.singer,
+      note: data.note
+    }
+    // remove undefined value
+    Object.keys(score).forEach(key => score[key] === undefined && delete score[key])
+    // write changes to database
+    await database.ref('scores').child(context.params.scoreId).set(score)
+
+    const snap = await database.ref('scores').once('value')
+    const scores: IScoreList = snap.val() || {}
+    await backup(scores, { database: false, storage: true })
+  } catch (err) {
+    console.error(err)
+  }
 })
