@@ -224,7 +224,7 @@ export default class ScoreList extends Vue {
     return this.kadaikyokuAddress === this.editItem.address
   }
 
-  dummyScore = { name: 'xxx' }
+  dummyScore = { name: 'xxx', id: '' }
   // delete form
   delForm = {
     self: this as ScoreList,
