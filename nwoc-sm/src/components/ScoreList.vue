@@ -22,6 +22,35 @@
           flat
           dense
         >
+          <v-dialog v-model="delForm.dialog" persistent :max-width="maxWidth">
+            <v-card>
+              <v-card-title>
+                この楽譜を削除しますか？
+              </v-card-title>
+              <v-card-text>
+                <v-alert dense type="warning">
+                  削除を行うと元には戻せません。
+                </v-alert>
+                <p>正式名を入力して削除を確定してください。</p>
+                <v-text-field :placeholder="delForm.score.name" v-model="delForm.name" />
+              </v-card-text>
+              <v-card-actions>
+                <v-btn text @click="delForm.close()">
+                  Cancel
+                </v-btn>
+                <v-spacer />
+                <v-btn
+                  :disabled="delForm.score.name != delForm.name"
+                  class="white--text"
+                  color="red"
+                  depressed
+                  @click="delForm.delete()"
+                >
+                  OK
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
           <v-dialog v-model="dialog" persistent :max-width="maxWidth">
             <template v-slot:activator="{ on }">
               <v-btn
@@ -130,7 +159,7 @@
         </v-icon>
         <v-icon
           small
-          @click="deleteScore(item)"
+          @click="delForm.open(item)"
         >
           mdi-delete
         </v-icon>
@@ -193,6 +222,36 @@ export default class ScoreList extends Vue {
   db = firebase.firestore()
   get isKadaikyoku() {
     return this.kadaikyokuAddress === this.editItem.address
+  }
+
+  dummyScore = { name: 'xxx' }
+  // delete form
+  delForm = {
+    self: this as ScoreList,
+    dialog: false,
+    dummy: this.dummyScore,
+    score: this.dummyScore,
+    name: '',
+    open(score: IScore) {
+      this.dialog = true
+      this.score = score
+    },
+    close() {
+      this.dialog = false
+      this.name = ''
+      setTimeout(() => this.score = this.dummy, 100)
+    },
+    delete() {
+      if (this.score === this.dummy) return
+      const db = this.self.db as firebase.firestore.Firestore
+      db.collection('scores').doc(this.score.id).delete().then(() => {
+        const scores = this.self.scores as IScore[]
+        scores.splice(scores.findIndex(val => val.id === this.score.id), 1)
+        this.close()
+      }).catch(() => {
+
+      })
+    }
   }
 
   // table valiables(constants)
@@ -277,6 +336,10 @@ export default class ScoreList extends Vue {
     this.dialog = true
   }
 
+  deleteScore(score: IScore) {
+    alert(`You can't delete yet.`)
+  }
+
   close() {
     this.dialog = false
     this.errMsg = ''
@@ -292,7 +355,7 @@ export default class ScoreList extends Vue {
       name: this.editItem.name,
       otherName: this.editItem.otherName,
       address: this.db.collection('addresses').doc(this.editItem.address),
-      publisher: (!this.isKadaikyoku)? this.db.collection('publishers').doc(this.editItem.publisher): null,
+      publisher: (!this.isKadaikyoku && !!this.editItem.publisher)? this.db.collection('publishers').doc(this.editItem.publisher): null,
       year: (this.isKadaikyoku)? this.editItem.year: null,
       singer: (!this.isKadaikyoku)? this.editItem.singer: '',
       note: this.editItem.note
