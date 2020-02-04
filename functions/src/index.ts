@@ -207,26 +207,28 @@ exports.updateBackup = functions.firestore.document('scores/{scoreId}').onWrite(
     const publishers: IStringKeyValue = await getPublishers()
     const addresses: IStringKeyValue = await getAddresses()
 
+    let score: IScore|null = null
     const data = change.after.data()
-    if (typeof data === 'undefined') return
-    const address = addresses[data.address.id]
-    let year,publisher
-    if (address === '課題曲') {
-      year = data.year
-    } else {
-      publisher = publishers[data.publisher.id]
+    if (typeof data !== 'undefined') {  // onDeleteでない
+      const address = addresses[data.address.id]
+      let year,publisher
+      if (address === '課題曲') {
+        year = data.year
+      } else {
+        publisher = publishers[data.publisher.id]
+      }
+      score = {
+        name: data.name,
+        otherName: data.otherName,
+        address: address,
+        year: year,
+        publisher: publisher,
+        singer: data.singer,
+        note: data.note
+      }
+      // remove undefined value
+      Object.keys(score).forEach(key => score && score[key] === undefined && delete score[key])
     }
-    const score: IScore = {
-      name: data.name,
-      otherName: data.otherName,
-      address: address,
-      year: year,
-      publisher: publisher,
-      singer: data.singer,
-      note: data.note
-    }
-    // remove undefined value
-    Object.keys(score).forEach(key => score[key] === undefined && delete score[key])
     // write changes to database
     await database.ref('scores').child(context.params.scoreId).set(score)
 
