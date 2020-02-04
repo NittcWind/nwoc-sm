@@ -145,6 +145,7 @@
             append-icon="mdi-magnify"
             label="検索"
             single-line
+            clearable
             dense
           />
         </v-toolbar>
@@ -170,10 +171,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import ScoreItem from './ScoreItem.vue'
 import * as firebase from 'firebase/app'
 import { IScore, IAdresses, IPublishers } from '../types'
+import { watch } from 'fs'
 
 @Component({
   components: {
@@ -259,6 +261,10 @@ export default class ScoreList extends Vue {
   minItemsPerPage = 10
   maxItemsPerPage = 50
   searchText = ''
+  @Watch('searchText')
+  onSearchTextChange() {
+    history.replaceState(null, null, (this.searchText)? `?s=${this.searchText}`: '/')
+  }
   headers = [
     { text: '正式名', value: 'name'},
     { text: '別名', value: 'otherName'},
