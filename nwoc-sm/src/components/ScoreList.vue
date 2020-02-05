@@ -51,7 +51,7 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
-          <v-dialog v-model="dialog" persistent :max-width="maxWidth">
+          <v-dialog v-model="editForm.dialog" persistent :max-width="maxWidth">
             <template v-slot:activator="{ on }">
               <v-btn
                 class="mb-2"
@@ -65,20 +65,20 @@
               <v-progress-linear
                 top
                 absolute
-                :active="loading"
-                :indeterminate="loading"
+                :active="editForm.loading"
+                :indeterminate="editForm.loading"
               />
               <v-card-title>
                 <v-text-field
                   required
                   label="正式名"
-                  v-model="editItem.name"
+                  v-model="editForm.item.name"
                 />
               </v-card-title>
               <v-card-text>
                 <v-text-field
                   label="別名"
-                  v-model="editItem.otherName"
+                  v-model="editForm.item.otherName"
                 />
                 <v-select
                   required
@@ -86,7 +86,7 @@
                   :items="addresses"
                   item-text="name"
                   item-value="id"
-                  v-model="editItem.address"
+                  v-model="editForm.item.address"
                 />
                 <v-select
                   v-if="!isKadaikyoku"
@@ -94,37 +94,37 @@
                   :items="publishers"
                   item-text="name"
                   item-value="id"
-                  v-model="editItem.publisher"
+                  v-model="editForm.item.publisher"
                 />
                 <v-text-field
                   v-if="isKadaikyoku"
                   type="number"
                   label="年"
                   min="1940" max="2200"
-                  v-model="editItem.year"
+                  v-model="editForm.item.year"
                 />
                 <v-text-field
                 v-if="!isKadaikyoku"
                   label="歌手"
-                  v-model="editItem.singer"
+                  v-model="editForm.item.singer"
                 />
                 <v-textarea
                   label="備考"
-                  v-model="editItem.note"
+                  v-model="editForm.item.note"
                 />
                 <v-alert
-                  v-if="!!errMsg"
+                  v-if="!!editForm.errorMessage"
                   dense
                   outlined
                   type="error"
                 >
-                  {{ errMsg }}
+                  {{ editForm.errorMessage }}
                 </v-alert>
               </v-card-text>
               <v-card-actions>
                 <v-btn
                   text
-                  @click="close"
+                  @click="editForm.close()"
                 >
                   Cancel
                 </v-btn>
@@ -132,7 +132,7 @@
                 <v-btn
                   text
                   color="primary"
-                  @click="save"
+                  @click="editForm.save()"
                 >
                   OK
                 </v-btn>
@@ -154,7 +154,7 @@
         <v-icon
           small
           class="mr-2"
-          @click="editScore(item)"
+          @click="editForm.edit(item)"
         >
           mdi-pencil
         </v-icon>
@@ -175,7 +175,6 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import ScoreItem from './ScoreItem.vue'
 import * as firebase from 'firebase/app'
 import { IScore, IAdresses, IPublishers } from '../types'
-import { watch } from 'fs'
 
 @Component({
   components: {
@@ -186,6 +185,7 @@ export default class ScoreList extends Vue {
   publishers: IPublishers[] = []
   addresses: IAdresses[] = []
   scores: IScore[] = []
+  db = firebase.firestore()
 
   id2name(arr: IPublishers[] | IAdresses[], id: string = ''): string {
     const target = arr.find(val => val.id === id)
@@ -196,34 +196,93 @@ export default class ScoreList extends Vue {
     return (target && target.id) || ''
   }
 
-  // edit dialog variables(constants)
-  loading = false
+  // dialog
   maxWidth = 640
-  dialog = false
-  editTargetId = ''
-  editItem = {
-    name: '',
-    otherName: '',
-    address: '',
-    publisher: '',
-    year: (new Date()).getFullYear(),
-    singer: '',
-    note: ''
+
+  // edit dialog variables(constants)
+  editForm = {
+    self: this as ScoreList,
+    dialog: false,
+    loading: false,
+    targetId: '',
+    item: {
+      name: '',
+      otherName: '',
+      address: '',
+      publisher: '',
+      year: (new Date()).getFullYear(),
+      singer: '',
+      note: ''
+    },
+    default: {
+      name: '',
+      otherName: '',
+      address: '',
+      publisher: '',
+      year: (new Date()).getFullYear(),
+      singer: '',
+      note: ''
+    },
+    errorMessage: '',
+    edit(score: IScore) {
+      this.targetId = score.id
+      this.item = {
+        name: score.name,
+        otherName: score.otherName || '',
+        address: this.self.name2id(this.self.addresses, score.address),
+        publisher: this.self.name2id(this.self.publishers, score.publisher),
+        year: score.year || (new Date().getFullYear()),
+        singer: score.singer || '',
+        note: score.note || ''
+      }
+      this.dialog = true
+    },
+    close() {
+      this.dialog = false
+      this.errorMessage = ''
+      setTimeout(() => {
+        this.targetId = ''
+        this.item = Object.assign({}, this.default)
+      }, 100)
+    },
+    async save() {
+      this.loading = true
+      const name = this.item.name.trim()
+      const otherName = this.item.otherName.trim()
+      const singer = (!this.self.isKadaikyoku)? this.item.singer.trim(): ''
+      const note = this.item.note.trim()
+      const score = {
+        name, otherName, singer, note,
+        address: this.self.db.collection('addresses').doc(this.item.address),
+        publisher: (!this.self.isKadaikyoku && !!this.item.publisher)? this.self.db.collection('publishers').doc(this.item.publisher): null,
+        year: (this.self.isKadaikyoku)? this.item.year: null
+      }
+      try {
+        const data = {
+          name, otherName, singer, note,
+          address: this.self.id2name(this.self.addresses, this.item.address),
+          publisher: (!this.self.isKadaikyoku)? this.self.id2name(this.self.publishers, this.item.publisher): undefined,
+          year: (this.self.isKadaikyoku)? this.item.year: undefined
+        }
+        if (this.targetId === '') {
+          const doc = await this.self.db.collection('scores').add(Object.assign(score, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
+          this.self.scores.push(Object.assign(data, { id: doc.id }))
+        } else {
+          await this.self.db.collection('scores').doc(this.targetId).set(Object.assign(score, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
+          this.self.scores.splice(this.self.scores.findIndex(val => val.id === this.targetId), 1)
+          this.self.scores.push(Object.assign(data, { id: this.targetId }))
+        }
+        this.close()
+      } catch (err) {
+        this.errorMessage = err.message
+      } finally {
+        this.loading = false
+      }
+    }
   }
-  defaultItem = {
-    name: '',
-    otherName: '',
-    address: '',
-    publisher: '',
-    year: (new Date()).getFullYear(),
-    singer: '',
-    note: ''
-  }
-  errMsg = ''
   kadaikyokuAddress = ''
-  db = firebase.firestore()
   get isKadaikyoku() {
-    return this.kadaikyokuAddress === this.editItem.address
+    return this.kadaikyokuAddress === this.editForm.item.address
   }
 
   dummyScore = { name: 'xxx', id: '' }
@@ -263,7 +322,7 @@ export default class ScoreList extends Vue {
   searchText = ''
   @Watch('searchText')
   onSearchTextChange() {
-    history.replaceState(null, null, (this.searchText)? `?s=${this.searchText}`: '/')
+    history.replaceState(null, '', (this.searchText)? `?s=${this.searchText}`: '/')
   }
   headers = [
     { text: '正式名', value: 'name'},
@@ -275,19 +334,18 @@ export default class ScoreList extends Vue {
     { text: '備考', value: 'note'},
     { text: 'Actions', value: 'action', sortable: false }
   ]
-  sortBy = ['name', 'publisher']
+  sortBy = ['address', 'name']
   width = window.innerWidth
   get itemsPerPage() {
     return (this.width < this.mobileBreakpoint)? this.minItemsPerPage: this.maxItemsPerPage
   }
-
-  handleResize() {
-    this.width = window.innerWidth
-  }
   
+  // on mount
   async mounted() {
     // 表示数変更のためのリサイズイベント
-    window.addEventListener('resize', this.handleResize)
+    window.addEventListener('resize', () => {
+      this.width = window.innerWidth
+    })
 
     // 保管場所と出版社は参照
     this.db.collection('publishers').orderBy('name').get().then(querySnapshot => {
@@ -326,79 +384,6 @@ export default class ScoreList extends Vue {
         address: 'error'
       })
     })
-  }
-
-  editScore(score: IScore) {
-    this.editTargetId = score.id
-    this.editItem = {
-      name: score.name,
-      otherName: score.otherName || '',
-      address: this.name2id(this.addresses, score.address),
-      publisher: this.name2id(this.publishers, score.publisher),
-      year: score.year || (new Date().getFullYear()),
-      singer: score.singer || '',
-      note: score.note || ''
-    }
-    this.dialog = true
-  }
-
-  deleteScore(score: IScore) {
-    alert(`You can't delete yet.`)
-  }
-
-  close() {
-    this.dialog = false
-    this.errMsg = ''
-    setTimeout(() => {
-      this.editTargetId = ''
-      this.editItem = Object.assign({}, this.defaultItem)
-    }, 100)
-  }
-
-  async save() {
-    this.loading = true
-    const score = {
-      name: this.editItem.name,
-      otherName: this.editItem.otherName,
-      address: this.db.collection('addresses').doc(this.editItem.address),
-      publisher: (!this.isKadaikyoku && !!this.editItem.publisher)? this.db.collection('publishers').doc(this.editItem.publisher): null,
-      year: (this.isKadaikyoku)? this.editItem.year: null,
-      singer: (!this.isKadaikyoku)? this.editItem.singer: '',
-      note: this.editItem.note
-    }
-    try {
-      if (this.editTargetId === '') {
-        const doc = await this.db.collection('scores').add(Object.assign(score, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
-        this.scores.push({
-          id: doc.id,
-          name: this.editItem.name,
-          otherName: this.editItem.otherName,
-          address: this.id2name(this.addresses, this.editItem.address),
-          publisher: (!this.isKadaikyoku)? this.id2name(this.publishers, this.editItem.publisher): undefined,
-          year: (this.isKadaikyoku)? this.editItem.year: undefined,
-          singer: (!this.isKadaikyoku)? this.editItem.singer: '',
-          note: this.editItem.note
-        })
-      } else {
-        await this.db.collection('scores').doc(this.editTargetId).set(Object.assign(score, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
-        this.scores.splice(this.scores.findIndex(val => val.id === this.editTargetId), 1)
-        this.scores.push({
-          id: this.editTargetId,
-          name: this.editItem.name,
-          otherName: this.editItem.otherName,
-          address: this.id2name(this.addresses, this.editItem.address),//this.addresses.find(val => val.id === this.editItem.address).name,
-          publisher: (!this.isKadaikyoku)? this.id2name(this.publishers, this.editItem.publisher): undefined,
-          year: (this.isKadaikyoku)? this.editItem.year: undefined,
-          singer: (!this.isKadaikyoku)? this.editItem.singer: '',
-          note: this.editItem.note
-        })
-      }
-      this.close()
-    } catch (err) {
-      this.errMsg = err.message
-    } finally {
-      this.loading = false
-    }
   }
 }
 </script>
