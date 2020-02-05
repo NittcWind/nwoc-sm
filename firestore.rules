@@ -4,6 +4,15 @@ service cloud.firestore {
     function isAdmin() {
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
+    function existingData() {
+      return resource.data;
+    }
+    function incomingData() {
+      return request.resource.data;
+    }
+    function validateString(text, min, max) {
+      return text is string && text.size() <= max && text.size() >= min;
+    }
     match /{document=**} {
       allow read, write: if false;
     }
@@ -16,7 +25,13 @@ service cloud.firestore {
       allow create: if isAdmin();
     }
     match /scores/{scoreId} {
-      allow write: if isAdmin();
+      allow create, update:
+        if isAdmin() &&
+          validateString(incomingData().name, 1, 100) &&
+          validateString(incomingData().otherName, 0, 100) &&
+          validateString(incomingData().singer, 0, 100) &&
+          validateString(incomingData().note, 0, 500);
+      allow delete: if isAdmin();
     }
   }
 }
