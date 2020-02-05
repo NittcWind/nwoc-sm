@@ -1,18 +1,47 @@
 <template>
   <v-app>
-    <!--
     <v-navigation-drawer
       v-model="drawer"
       app
+      bottom
     >
+      <v-list two-line>
+        <v-list-item href="/pdf">
+          <v-list-item-content>
+            <v-list-item-title>
+              一覧を印刷する
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              PDFをダウンロード
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item href="/csv">
+          <v-list-item-content>
+            <v-list-item-title>
+              CSVで一覧を取得する
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              Excelで閲覧できる形式
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item href="/backup">
+          <v-list-item-content>
+            <v-list-item-title>
+              JSONで一覧を取得する
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </v-navigation-drawer>
-    -->
     <v-app-bar
       app
     >
       <v-btn
         icon
         text
+        @click="drawer = !drawer"
       >
         <v-img
           src="./assets/logo.color.svg"
@@ -27,7 +56,6 @@
       </v-toolbar-title>
       <v-spacer>
       </v-spacer>
-      <new-button />
       <account-button />
     </v-app-bar>
 
@@ -45,15 +73,11 @@
 import { Component, Vue } from 'vue-property-decorator'
 import ScoreList from './components/ScoreList.vue'
 import AccountButton from './components/AccountButton.vue'
-import SearchButton from './components/SearchButton.vue'
-import NewButton from './components/NewButton.vue'
 
 @Component({
   components: {
     ScoreList,
-    AccountButton,
-    SearchButton,
-    NewButton
+    AccountButton
   }
 })
 export default class App extends Vue {

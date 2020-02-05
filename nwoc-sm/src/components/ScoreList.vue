@@ -191,15 +191,10 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
-import ScoreItem from './ScoreItem.vue'
 import * as firebase from 'firebase/app'
 import { IScore, IAdresses, IPublishers } from '../types'
 
-@Component({
-  components: {
-    ScoreItem
-  }
-})
+@Component
 export default class ScoreList extends Vue {
   publishers: IPublishers[] = []
   addresses: IAdresses[] = []
