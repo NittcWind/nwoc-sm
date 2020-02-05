@@ -22,6 +22,7 @@
           flat
           dense
         >
+          <!-- 削除ダイアログ begin -->
           <v-dialog v-model="delForm.dialog" persistent :max-width="maxWidth">
             <v-card>
               <v-card-title>
@@ -51,6 +52,8 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
+          <!-- 削除ダイアログ end -->
+          <!-- 新規・編集ダイアログ begin -->
           <v-dialog v-model="editForm.dialog" persistent :max-width="maxWidth">
             <template v-slot:activator="{ on }">
               <v-btn
@@ -62,83 +65,99 @@
               </v-btn>
             </template>
             <v-card>
-              <v-progress-linear
-                top
-                absolute
-                :active="editForm.loading"
-                :indeterminate="editForm.loading"
-              />
-              <v-card-title>
-                <v-text-field
-                  required
-                  label="正式名"
-                  v-model="editForm.item.name"
+              <v-form
+                v-model="editForm.valid"
+                @submit.prevent="editForm.save()"
+              >
+                <v-progress-linear
+                  top
+                  absolute
+                  :active="editForm.loading"
+                  :indeterminate="editForm.loading"
                 />
-              </v-card-title>
-              <v-card-text>
-                <v-text-field
-                  label="別名"
-                  v-model="editForm.item.otherName"
-                />
-                <v-select
-                  required
-                  label="保管場所"
-                  :items="addresses"
-                  item-text="name"
-                  item-value="id"
-                  v-model="editForm.item.address"
-                />
-                <v-select
+                <v-card-title>
+                  <v-text-field
+                    required
+                    label="正式名"
+                    v-model="editForm.item.name"
+                    :rules="validationRules.name"
+                  />
+                </v-card-title>
+                <v-card-text>
+                  <v-text-field
+                    label="別名"
+                    v-model="editForm.item.otherName"
+                    :rules="validationRules.otherName"
+                  />
+                  <v-select
+                    required
+                    label="保管場所"
+                    :items="addresses"
+                    item-text="name"
+                    item-value="id"
+                    v-model="editForm.item.address"
+                    :rules="validationRules.address"
+                  />
+                  <v-select
+                    v-if="!isKadaikyoku"
+                    label="出版社"
+                    :items="publishers"
+                    item-text="name"
+                    item-value="id"
+                    v-model="editForm.item.publisher"
+                    :required="!isKadaikyoku"
+                    :rules="validationRules.publisher"
+                  />
+                  <v-text-field
+                    v-if="isKadaikyoku"
+                    type="number"
+                    label="年"
+                    min="1940" max="2200"
+                    v-model="editForm.item.year"
+                    :required="isKadaikyoku"
+                    :rules="validationRules.year"
+                  />
+                  <v-text-field
                   v-if="!isKadaikyoku"
-                  label="出版社"
-                  :items="publishers"
-                  item-text="name"
-                  item-value="id"
-                  v-model="editForm.item.publisher"
-                />
-                <v-text-field
-                  v-if="isKadaikyoku"
-                  type="number"
-                  label="年"
-                  min="1940" max="2200"
-                  v-model="editForm.item.year"
-                />
-                <v-text-field
-                v-if="!isKadaikyoku"
-                  label="歌手"
-                  v-model="editForm.item.singer"
-                />
-                <v-textarea
-                  label="備考"
-                  v-model="editForm.item.note"
-                />
-                <v-alert
-                  v-if="!!editForm.errorMessage"
-                  dense
-                  outlined
-                  type="error"
-                >
-                  {{ editForm.errorMessage }}
-                </v-alert>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="editForm.close()"
-                >
-                  Cancel
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                  text
-                  color="primary"
-                  @click="editForm.save()"
-                >
-                  OK
-                </v-btn>
-              </v-card-actions>
+                    label="歌手"
+                    v-model="editForm.item.singer"
+                    :rules="validationRules.singer"
+                  />
+                  <v-textarea
+                    label="備考"
+                    v-model="editForm.item.note"
+                    :rules="validationRules.note"
+                  />
+                  <v-alert
+                    v-if="!!editForm.errorMessage"
+                    dense
+                    outlined
+                    type="error"
+                  >
+                    {{ editForm.errorMessage }}
+                  </v-alert>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn
+                    text
+                    @click="editForm.close()"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-spacer />
+                  <v-btn
+                    text
+                    color="primary"
+                    type="submit"
+                    :disabled="!editForm.valid"
+                  >
+                    OK
+                  </v-btn>
+                </v-card-actions>
+              </v-form>
             </v-card>
           </v-dialog>
+          <!-- 新規・編集ダイアログ end -->
           <v-spacer />
           <v-text-field
             v-model="searchText"
@@ -202,6 +221,7 @@ export default class ScoreList extends Vue {
   // edit dialog variables(constants)
   editForm = {
     self: this as ScoreList,
+    valid: false,
     dialog: false,
     loading: false,
     targetId: '',
@@ -246,6 +266,7 @@ export default class ScoreList extends Vue {
       }, 100)
     },
     async save() {
+      if (!this.valid) return
       this.loading = true
       const name = this.item.name.trim()
       const otherName = this.item.otherName.trim()
@@ -283,6 +304,25 @@ export default class ScoreList extends Vue {
   kadaikyokuAddress = ''
   get isKadaikyoku() {
     return this.kadaikyokuAddress === this.editForm.item.address
+  }
+
+  isRequire(val: string) {
+    return !!val || '必須項目です。'
+  }
+  lengthCheck(formName: string, max: number, required: boolean = false) {
+    return (required)?
+      (val: string) => val.length <= max || `${formName}は${max}文字以内で入力してください。`:
+      (val: string) => (val.length === 0 || val.length <= max) || `${formName}は${max}文字以内で入力してください。`
+  }
+  valid = false
+  validationRules = {
+    name: [ this.isRequire, this.lengthCheck('正式名', 100, true) ],
+    otherName: [ this.lengthCheck('別名', 100) ],
+    address: [ (v: string) => !!v || '保管場所を選択してください。' ],
+    year: [ (v: number) => !this.isKadaikyoku && !!v && 1940<v&&v<2200 || '年を入力してください。' ],
+    publisher: [ (v: string) => !this.isKadaikyoku && !!v || '出版社を選択してください。' ],
+    singer: [ this.lengthCheck('歌手', 100) ],
+    note: [ this.lengthCheck('備考', 500) ]
   }
 
   dummyScore = { name: 'xxx', id: '' }
