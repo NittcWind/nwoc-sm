@@ -35,6 +35,7 @@ interface IStringKeyValue {
   [key: string]: string
 }
 
+// publishers, addressesの一覧取得
 const getIdValue = (collectionName: string, valName: string) => () => new Promise<IStringKeyValue>(async (resolve, reject) => {
   try {
     const obj: IStringKeyValue = {}
