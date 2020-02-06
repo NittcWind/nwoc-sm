@@ -15,7 +15,8 @@
     "rewrites": [
       { "source": "/backup", "function": "backup" },
       { "source": "/json", "function": "json" },
-      { "source": "/csv", "function": "csv" }
+      { "source": "/csv", "function": "csv" },
+      { "source": "/pdf", "function": "pdf" }
     ],
     "ignore": [
       "firebase.json",
