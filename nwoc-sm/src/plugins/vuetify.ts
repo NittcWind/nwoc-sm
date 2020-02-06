@@ -3,5 +3,12 @@ import Vuetify from 'vuetify/lib';
 
 Vue.use(Vuetify);
 
-export default new Vuetify({
+// dark theme
+const mql = matchMedia('(prefers-color-scheme: dark)');
+mql.addEventListener('change', e => vuetify.framework.theme.dark = e.matches);
+
+const vuetify = new Vuetify({
+  theme: { dark: mql.matches }
 });
+
+export default vuetify;

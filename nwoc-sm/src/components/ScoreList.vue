@@ -1,192 +1,188 @@
 <template>
-  <div
+  <v-data-table
     class="pa-2"
+    :search="searchText"
+    :headers="headers"
+    :items="scores"
+    :items-per-page="itemsPerPage"
+    :sort-by="sortBy"
+    :mobile-breakpoint="mobileBreakpoint"
+    multi-sort
+    dense
+    :loading="scores.length <= 0"
+    :footer-props="{
+      disableItemsPerPage: true,
+      itemsPerPageOptions: [minItemsPerPage,maxItemsPerPage]
+    }"
   >
-    <v-data-table
-      :search="searchText"
-      :headers="headers"
-      :items="scores"
-      :items-per-page="itemsPerPage"
-      :sort-by="sortBy"
-      :mobile-breakpoint="mobileBreakpoint"
-      multi-sort
-      dense
-      :loading="scores.length <= 0"
-      :footer-props="{
-        disableItemsPerPage: true,
-        itemsPerPageOptions: [minItemsPerPage,maxItemsPerPage]
-      }"
-    >
-      <template v-slot:top>
-        <v-toolbar
-          flat
-          dense
-        >
-          <!-- 削除ダイアログ begin -->
-          <v-dialog v-model="delForm.dialog" persistent :max-width="maxWidth">
-            <v-card>
+    <template v-slot:top>
+      <v-toolbar
+        flat
+      >
+        <!-- 削除ダイアログ begin -->
+        <v-dialog v-model="delForm.dialog" persistent :max-width="maxWidth">
+          <v-card>
+            <v-card-title>
+              この楽譜を削除しますか？
+            </v-card-title>
+            <v-card-text>
+              <v-alert dense type="warning">
+                削除を行うと元には戻せません。
+              </v-alert>
+              <p>正式名を入力して削除を確定してください。</p>
+              <v-text-field :placeholder="delForm.score.name" v-model="delForm.name" />
+            </v-card-text>
+            <v-card-actions>
+              <v-btn text @click="delForm.close()">
+                Cancel
+              </v-btn>
+              <v-spacer />
+              <v-btn
+                :disabled="delForm.score.name != delForm.name"
+                class="white--text"
+                color="red"
+                depressed
+                @click="delForm.delete()"
+              >
+                OK
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <!-- 削除ダイアログ end -->
+        <!-- 新規・編集ダイアログ begin -->
+        <v-dialog v-model="editForm.dialog" persistent :max-width="maxWidth">
+          <template v-slot:activator="{ on }">
+            <v-btn
+              color="primary"
+              v-on="on"
+            >
+              New
+            </v-btn>
+          </template>
+          <v-card>
+            <v-form
+              v-model="editForm.valid"
+              @submit.prevent="editForm.save()"
+            >
+              <v-progress-linear
+                top
+                absolute
+                :active="editForm.loading"
+                :indeterminate="editForm.loading"
+              />
               <v-card-title>
-                この楽譜を削除しますか？
+                <v-text-field
+                  required
+                  label="正式名"
+                  v-model="editForm.item.name"
+                  :rules="validationRules.name"
+                />
               </v-card-title>
               <v-card-text>
-                <v-alert dense type="warning">
-                  削除を行うと元には戻せません。
+                <v-text-field
+                  label="別名"
+                  v-model="editForm.item.otherName"
+                  :rules="validationRules.otherName"
+                />
+                <v-select
+                  required
+                  label="保管場所"
+                  :items="addresses"
+                  item-text="name"
+                  item-value="id"
+                  v-model="editForm.item.address"
+                  :rules="validationRules.address"
+                />
+                <v-select
+                  v-if="!isKadaikyoku"
+                  label="出版社"
+                  :items="publishers"
+                  item-text="name"
+                  item-value="id"
+                  v-model="editForm.item.publisher"
+                  :required="!isKadaikyoku"
+                  :rules="validationRules.publisher"
+                />
+                <v-text-field
+                  v-if="isKadaikyoku"
+                  type="number"
+                  label="年"
+                  min="1940" max="2200"
+                  v-model="editForm.item.year"
+                  :required="isKadaikyoku"
+                  :rules="validationRules.year"
+                />
+                <v-text-field
+                v-if="!isKadaikyoku"
+                  label="歌手"
+                  v-model="editForm.item.singer"
+                  :rules="validationRules.singer"
+                />
+                <v-textarea
+                  label="備考"
+                  v-model="editForm.item.note"
+                  :rules="validationRules.note"
+                />
+                <v-alert
+                  v-if="!!editForm.errorMessage"
+                  dense
+                  outlined
+                  type="error"
+                >
+                  {{ editForm.errorMessage }}
                 </v-alert>
-                <p>正式名を入力して削除を確定してください。</p>
-                <v-text-field :placeholder="delForm.score.name" v-model="delForm.name" />
               </v-card-text>
               <v-card-actions>
-                <v-btn text @click="delForm.close()">
+                <v-btn
+                  text
+                  @click="editForm.close()"
+                >
                   Cancel
                 </v-btn>
                 <v-spacer />
                 <v-btn
-                  :disabled="delForm.score.name != delForm.name"
-                  class="white--text"
-                  color="red"
-                  depressed
-                  @click="delForm.delete()"
+                  text
+                  color="primary"
+                  type="submit"
+                  :disabled="!editForm.valid"
                 >
                   OK
                 </v-btn>
               </v-card-actions>
-            </v-card>
-          </v-dialog>
-          <!-- 削除ダイアログ end -->
-          <!-- 新規・編集ダイアログ begin -->
-          <v-dialog v-model="editForm.dialog" persistent :max-width="maxWidth">
-            <template v-slot:activator="{ on }">
-              <v-btn
-                class="mb-2"
-                color="primary"
-                v-on="on"
-              >
-                New
-              </v-btn>
-            </template>
-            <v-card>
-              <v-form
-                v-model="editForm.valid"
-                @submit.prevent="editForm.save()"
-              >
-                <v-progress-linear
-                  top
-                  absolute
-                  :active="editForm.loading"
-                  :indeterminate="editForm.loading"
-                />
-                <v-card-title>
-                  <v-text-field
-                    required
-                    label="正式名"
-                    v-model="editForm.item.name"
-                    :rules="validationRules.name"
-                  />
-                </v-card-title>
-                <v-card-text>
-                  <v-text-field
-                    label="別名"
-                    v-model="editForm.item.otherName"
-                    :rules="validationRules.otherName"
-                  />
-                  <v-select
-                    required
-                    label="保管場所"
-                    :items="addresses"
-                    item-text="name"
-                    item-value="id"
-                    v-model="editForm.item.address"
-                    :rules="validationRules.address"
-                  />
-                  <v-select
-                    v-if="!isKadaikyoku"
-                    label="出版社"
-                    :items="publishers"
-                    item-text="name"
-                    item-value="id"
-                    v-model="editForm.item.publisher"
-                    :required="!isKadaikyoku"
-                    :rules="validationRules.publisher"
-                  />
-                  <v-text-field
-                    v-if="isKadaikyoku"
-                    type="number"
-                    label="年"
-                    min="1940" max="2200"
-                    v-model="editForm.item.year"
-                    :required="isKadaikyoku"
-                    :rules="validationRules.year"
-                  />
-                  <v-text-field
-                  v-if="!isKadaikyoku"
-                    label="歌手"
-                    v-model="editForm.item.singer"
-                    :rules="validationRules.singer"
-                  />
-                  <v-textarea
-                    label="備考"
-                    v-model="editForm.item.note"
-                    :rules="validationRules.note"
-                  />
-                  <v-alert
-                    v-if="!!editForm.errorMessage"
-                    dense
-                    outlined
-                    type="error"
-                  >
-                    {{ editForm.errorMessage }}
-                  </v-alert>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn
-                    text
-                    @click="editForm.close()"
-                  >
-                    Cancel
-                  </v-btn>
-                  <v-spacer />
-                  <v-btn
-                    text
-                    color="primary"
-                    type="submit"
-                    :disabled="!editForm.valid"
-                  >
-                    OK
-                  </v-btn>
-                </v-card-actions>
-              </v-form>
-            </v-card>
-          </v-dialog>
-          <!-- 新規・編集ダイアログ end -->
-          <v-spacer />
-          <v-text-field
-            v-model="searchText"
-            append-icon="mdi-magnify"
-            label="検索"
-            single-line
-            clearable
-            dense
-          />
-        </v-toolbar>
-      </template>
-      <template v-slot:item.action="{ item }">
-        <v-icon
-          small
-          class="mr-2"
-          @click="editForm.edit(item)"
-        >
-          mdi-pencil
-        </v-icon>
-        <v-icon
-          small
-          @click="delForm.open(item)"
-        >
-          mdi-delete
-        </v-icon>
-      </template>
-      <template v-slot:no-data>NO DATA</template>
-    </v-data-table>
-  </div>
+            </v-form>
+          </v-card>
+        </v-dialog>
+        <!-- 新規・編集ダイアログ end -->
+        <v-spacer />
+        <v-text-field
+          v-model="searchText"
+          append-icon="mdi-magnify"
+          label="検索"
+          single-line
+          clearable
+          hide-details
+          dense
+        />
+      </v-toolbar>
+    </template>
+    <template v-slot:item.action="{ item }">
+      <v-icon
+        small
+        class="mr-2"
+        @click="editForm.edit(item)"
+      >
+        mdi-pencil
+      </v-icon>
+      <v-icon
+        small
+        @click="delForm.open(item)"
+      >
+        mdi-delete
+      </v-icon>
+    </template>
+    <template v-slot:no-data>NO DATA</template>
+  </v-data-table>
 </template>
 
 <script lang="ts">
