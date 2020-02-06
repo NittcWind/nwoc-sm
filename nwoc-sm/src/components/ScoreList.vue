@@ -190,6 +190,8 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import * as firebase from 'firebase/app'
 import { IScore, IAdresses, IPublishers } from '../types'
 
+interface I { [key: string]: string }
+
 @Component
 export default class ScoreList extends Vue {
   publishers: IPublishers[] = []
@@ -346,6 +348,16 @@ export default class ScoreList extends Vue {
     }
   }
 
+  getUrlParam = (() => {
+    const param = location.search.substring(1).split('&').reduce((acc,cur) => {
+      if (cur.includes('=')) {
+        const [ k, v ] = cur.split('=')
+        acc[k] = v
+      }
+      return acc
+    }, {} as I)
+    return (key: string) => param[key] as string
+  })()
   // table valiables(constants)
   mobileBreakpoint = 640
   minItemsPerPage = 10
@@ -377,6 +389,9 @@ export default class ScoreList extends Vue {
     window.addEventListener('resize', () => {
       this.width = window.innerWidth
     })
+
+    // 検索の共有時
+    this.searchText = this.getUrlParam('s')
 
     // 保管場所と出版社は参照
     this.db.collection('publishers').orderBy('name').get().then(querySnapshot => {
