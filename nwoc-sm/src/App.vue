@@ -5,32 +5,19 @@
       app
       bottom
     >
-      <v-list two-line>
-        <v-list-item href="/pdf">
+      <v-list>
+        <v-list-item
+          v-for="(link, i) in links"
+          :key="i"
+          :href="link.link"
+          link
+        >
+          <v-list-item-action>
+            <v-icon v-text="link.icon"/>
+          </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>
-              一覧を印刷する
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              PDFをダウンロード
-            </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item href="/csv">
-          <v-list-item-content>
-            <v-list-item-title>
-              CSVで一覧を取得する
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              Excelで閲覧できる形式
-            </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item href="/backup">
-          <v-list-item-content>
-            <v-list-item-title>
-              JSONで一覧を取得する
-            </v-list-item-title>
+            <v-list-item-title v-text="link.title" />
+            <v-list-item-subtitle v-text="link.subtitle" />
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -82,6 +69,12 @@ import AccountButton from './components/AccountButton.vue'
 })
 export default class App extends Vue {
   drawer: boolean = false
+
+  links = [
+    { link: '/pdf', title: '一覧を印刷する', subtitle: 'PDFをダウンロード', icon: 'mdi-pdf-box' },
+    { link: '/csv', title: 'CSVで一覧を取得する', subtitle: 'Excelで閲覧できる形式', icon: 'mdi-file-excel-box' },
+    { link: '/buckup', title: 'JSONで一覧を取得する', subtitle: '', icon: 'mdi-json' }
+  ]
 }
 </script>
 
