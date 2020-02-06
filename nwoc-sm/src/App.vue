@@ -26,6 +26,7 @@
       app
     >
       <v-btn
+        name="open menu"
         icon
         text
         @click="drawer = !drawer"
@@ -58,8 +59,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import ScoreList from './components/ScoreList.vue'
-import AccountButton from './components/AccountButton.vue'
+//import ScoreList from './components/ScoreList.vue'
+const ScoreList = () => import('./components/ScoreList.vue')
+//import AccountButton from './components/AccountButton.vue'
+const AccountButton = () => import('./components/AccountButton.vue')
+import { mdiPdfBox, mdiFileExcelBox, mdiJson } from '@mdi/js'
 
 @Component({
   components: {
@@ -71,9 +75,9 @@ export default class App extends Vue {
   drawer: boolean = false
 
   links = [
-    { link: '/pdf', title: '一覧を印刷する', subtitle: 'PDFをダウンロード', icon: 'mdi-pdf-box' },
-    { link: '/csv', title: 'CSVで一覧を取得する', subtitle: 'Excelで閲覧できる形式', icon: 'mdi-file-excel-box' },
-    { link: '/buckup', title: 'JSONで一覧を取得する', subtitle: '', icon: 'mdi-json' }
+    { link: '/pdf', title: '一覧を印刷する', subtitle: 'PDFをダウンロード', icon: mdiPdfBox },
+    { link: '/csv', title: 'CSVで一覧を取得する', subtitle: 'Excelで閲覧できる形式', icon: mdiFileExcelBox },
+    { link: '/buckup', title: 'JSONで一覧を取得する', subtitle: '', icon: mdiJson }
   ]
 }
 </script>

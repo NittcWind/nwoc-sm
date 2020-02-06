@@ -157,7 +157,7 @@
         <v-spacer />
         <v-text-field
           v-model="searchText"
-          append-icon="mdi-magnify"
+          :append-icon="icons.mdiMagnify"
           label="検索"
           single-line
           clearable
@@ -171,15 +171,13 @@
         small
         class="mr-2"
         @click="editForm.edit(item)"
-      >
-        mdi-pencil
-      </v-icon>
+        v-text="icons.mdiPencil"
+      />
       <v-icon
         small
         @click="delForm.open(item)"
-      >
-        mdi-delete
-      </v-icon>
+        v-text="icons.mdiDelete"
+      />
     </template>
     <template v-slot:no-data>NO DATA</template>
   </v-data-table>
@@ -189,6 +187,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import * as firebase from 'firebase/app'
 import { IScore, IAdresses, IPublishers } from '../types'
+import { mdiMagnify, mdiPencil, mdiDelete, mdiClose } from '@mdi/js'
 
 interface I { [key: string]: string }
 
@@ -206,6 +205,13 @@ export default class ScoreList extends Vue {
   name2id(arr: IPublishers[] | IAdresses[], name: string = ''): string {
     const target = arr.find(val => val.name === name)
     return (target && target.id) || ''
+  }
+
+  icons = {
+    mdiMagnify,
+    mdiPencil,
+    mdiDelete,
+    mdiClose
   }
 
   // dialog

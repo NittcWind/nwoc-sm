@@ -5,12 +5,13 @@
   >
     <template v-slot:activator="{ on }">
       <v-btn
+        name="open account"
         text
         icon
         v-on="on"
         @click="loginCheck"
       >
-        <v-icon>mdi-account</v-icon>
+        <v-icon v-text="icons.mdiAccount" />
       </v-btn>
     </template>
 
@@ -31,7 +32,7 @@
           <v-list-item>
             <v-text-field
               v-model="password"
-              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              :append-icon="showPassword ? icons.mdiEye : icons.mdiEyeOff"
               :type="showPassword ? 'text' : 'password'"
               :rules="[required]"
               label="Password"
@@ -86,6 +87,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import * as firebase from 'firebase/app'
 import 'firebase/auth'
+import { mdiAccount, mdiEye, mdiEyeOff } from '@mdi/js'
 
 @Component
 export default class AccountButton extends Vue {
@@ -97,6 +99,12 @@ export default class AccountButton extends Vue {
   auth = firebase.auth()
   userEmail = ''
   loading = false
+
+  icons = {
+    mdiAccount,
+    mdiEye,
+    mdiEyeOff
+  }
 
   required(value: string) {
     return !!value || 'Required'
