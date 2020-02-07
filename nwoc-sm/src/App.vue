@@ -5,22 +5,7 @@
       app
       bottom
     >
-      <v-list>
-        <v-list-item
-          v-for="(link, i) in links"
-          :key="i"
-          :href="link.link"
-          link
-        >
-          <v-list-item-action>
-            <v-icon v-text="link.icon"/>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="link.title" />
-            <v-list-item-subtitle v-text="link.subtitle" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+      <link-list />
     </v-navigation-drawer>
     <v-app-bar
       app
@@ -63,22 +48,18 @@ import { Component, Vue } from 'vue-property-decorator'
 const ScoreList = () => import('./components/ScoreList.vue')
 //import AccountButton from './components/AccountButton.vue'
 const AccountButton = () => import('./components/AccountButton.vue')
-import { mdiPdfBox, mdiFileExcelBox, mdiJson } from '@mdi/js'
+//import LinkList from './components/LinkList.vue'
+const LinkList = () => import('./components/LinkList.vue')
 
 @Component({
   components: {
     ScoreList,
-    AccountButton
+    AccountButton,
+    LinkList
   }
 })
 export default class App extends Vue {
   drawer: boolean = false
-
-  links = [
-    { link: '/pdf', title: '一覧を印刷する', subtitle: 'PDFをダウンロード', icon: mdiPdfBox },
-    { link: '/csv', title: 'CSVで一覧を取得する', subtitle: 'Excelで閲覧できる形式', icon: mdiFileExcelBox },
-    { link: '/buckup', title: 'JSONで一覧を取得する', subtitle: '', icon: mdiJson }
-  ]
 }
 </script>
 
