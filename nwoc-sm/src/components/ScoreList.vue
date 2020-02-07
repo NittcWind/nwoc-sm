@@ -9,7 +9,7 @@
     :mobile-breakpoint="mobileBreakpoint"
     multi-sort
     dense
-    :loading="scores.length <= 0"
+    :loading="loading"
     :footer-props="{
       disableItemsPerPage: true,
       itemsPerPageOptions: [minItemsPerPage,maxItemsPerPage]
@@ -368,6 +368,7 @@ export default class ScoreList extends Vue {
   mobileBreakpoint = 640
   minItemsPerPage = 10
   maxItemsPerPage = 50
+  loading = true
   searchText = ''
   @Watch('searchText')
   onSearchTextChange() {
@@ -422,19 +423,31 @@ export default class ScoreList extends Vue {
     // 一覧取得
     let json = await fetch('/json').then(res => {
       return res.json()
-    }).then(json => {
+    }).catch(err => new Promise<object>((resolve, reject) => {
+      // ネットワークエラーなどが発生した場合localStorageからの取得を試みる
+      try {
+        const json = JSON.parse(localStorage.getItem('scores') || '{}')
+        resolve(json)
+      } catch (e) {
+        reject(e)
+      }
+    })).then(json => {
       json = json as object || {}
+      // ネットワークエラー用にlocalStorageに保存
+      localStorage.setItem('scores', JSON.stringify(json))
       Object.keys(json).forEach(key => {
         const score = json[key]
         if (typeof score !== 'object') return
         this.scores.push(Object.assign(score, { id: key }))
       })
+      this.loading = false
     }).catch(err => {
       this.scores.push({
         id: 'error',
         name: 'error',
         address: 'error'
       })
+      this.loading = false
     })
   }
 }
