@@ -4,9 +4,6 @@ service cloud.firestore {
     function isAdmin() {
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
-    function existingData() {
-      return resource.data;
-    }
     function incomingData() {
       return request.resource.data;
     }
