@@ -10,20 +10,20 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "firebase": "^7.17.1",
+    "firebase": "^7.19.1",
     "register-service-worker": "^1.7.1",
-    "vue": "^2.6.10",
+    "vue": "^2.6.12",
     "vue-class-component": "^7.2.5",
     "vue-property-decorator": "^8.5.1",
-    "vuetify": "^2.3.7"
+    "vuetify": "^2.3.10"
   },
   "devDependencies": {
     "@mdi/js": "^4.9.95",
-    "@vue/cli-plugin-babel": "^4.4.6",
-    "@vue/cli-plugin-eslint": "^4.4.6",
-    "@vue/cli-plugin-pwa": "^4.4.6",
-    "@vue/cli-plugin-typescript": "^4.4.6",
-    "@vue/cli-service": "^4.4.6",
+    "@vue/cli-plugin-babel": "^4.5.4",
+    "@vue/cli-plugin-eslint": "^4.5.4",
+    "@vue/cli-plugin-pwa": "^4.5.4",
+    "@vue/cli-plugin-typescript": "^4.5.4",
+    "@vue/cli-service": "^4.5.4",
     "@vue/eslint-config-typescript": "^4.0.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
@@ -31,7 +31,7 @@
     "sass-loader": "^8.0.0",
     "typescript": "~3.5.3",
     "vue-cli-plugin-vuetify": "^2.0.7",
-    "vue-template-compiler": "^2.6.10",
+    "vue-template-compiler": "^2.6.12",
     "vuetify-loader": "^1.6.0"
   }
 }
