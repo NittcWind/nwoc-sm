@@ -16,10 +16,12 @@ var firebaseConfig = {
   projectId: "nwoc-sm",
   storageBucket: "nwoc-sm.appspot.com",
   messagingSenderId: "275447746757",
-  appId: "1:275447746757:web:94265bb649f03309eea0ac"
+  appId: "1:275447746757:web:94265bb649f03309eea0ac",
+  measurementId: "G-DSV75VNM3F"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+firebase.analytics();
 
 Vue.config.productionTip = false
 
