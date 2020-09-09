@@ -389,7 +389,7 @@ export default class ScoreList extends Vue {
   get itemsPerPage() {
     return (this.width < this.mobileBreakpoint)? this.minItemsPerPage: this.maxItemsPerPage
   }
-  
+
   // on mount
   async mounted() {
     // 表示数変更のためのリサイズイベント
@@ -401,54 +401,43 @@ export default class ScoreList extends Vue {
     this.searchText = this.getUrlParam('s')
 
     // 保管場所と出版社は参照
-    this.db.collection('publishers').orderBy('name').get().then(querySnapshot => {
-      querySnapshot.forEach(doc => {
-        this.publishers.push({
-          id: doc.id,
-          name: doc.data().name
+    Promise.all([
+      this.db.collection('publishers').orderBy('name').get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          this.publishers.push({
+            id: doc.id,
+            name: doc.data().name
+          })
+        })
+      }),
+      this.db.collection('addresses').orderBy('address').get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          const address = doc.data().address
+          if (address === '課題曲') this.kadaikyokuAddress = doc.id
+          this.addresses.push({
+            id: doc.id,
+            name: address
+          })
         })
       })
-    })
-    this.db.collection('addresses').orderBy('address').get().then(querySnapshot => {
-      querySnapshot.forEach(doc => {
-        const address = doc.data().address
-        if (address === '課題曲') this.kadaikyokuAddress = doc.id
-        this.addresses.push({
-          id: doc.id,
-          name: address
+    ])
+      .then(() => {
+        return this.db.collection('scores').get()
+      })
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          const score = doc.data()
+          score.address = this.id2name(this.addresses, score.address.id)
+          score.publisher = score.publisher ? this.id2name(this.publishers, score.publisher.id) : undefined
+          this.scores.push(Object.assign(score, { id: doc.id }) as IScore)
         })
       })
-    })
-
-    // 一覧取得
-    let json = await fetch('/json').then(res => {
-      return res.json()
-    }).catch(err => new Promise<object>((resolve, reject) => {
-      // ネットワークエラーなどが発生した場合localStorageからの取得を試みる
-      try {
-        const json = JSON.parse(localStorage.getItem('scores') || '{}')
-        resolve(json)
-      } catch (e) {
-        reject(e)
-      }
-    })).then(json => {
-      json = json as object || {}
-      // ネットワークエラー用にlocalStorageに保存
-      localStorage.setItem('scores', JSON.stringify(json))
-      Object.keys(json).forEach(key => {
-        const score = json[key]
-        if (typeof score !== 'object') return
-        this.scores.push(Object.assign(score, { id: key }))
+      .then(() => {
+        this.loading = false
       })
-      this.loading = false
-    }).catch(err => {
-      this.scores.push({
-        id: 'error',
-        name: 'error',
-        address: 'error'
+      .catch(() => {
+        this.loading = false
       })
-      this.loading = false
-    })
   }
 }
 </script>

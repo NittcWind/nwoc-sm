@@ -22,6 +22,7 @@ service cloud.firestore {
       allow create: if isAdmin();
     }
     match /scores/{scoreId} {
+      allow read;
       allow create, update:
         if isAdmin() &&
           validateString(incomingData().name, 1, 100) &&
