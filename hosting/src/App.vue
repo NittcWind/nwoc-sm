@@ -32,13 +32,13 @@
       <account-button />
     </v-app-bar>
 
-    <v-content>
+    <v-main>
       <v-container
         fluid
       >
         <score-list />
       </v-container>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
