@@ -21,4 +21,6 @@ export const analytics = firebase.analytics()
 export const firestore = firebase.firestore()
 export const auth = firebase.auth()
 
-analytics.logEvent('page_view', {})
+if (process.env.NODE_ENV === 'production') {
+  analytics.logEvent('page_view', {})
+}
