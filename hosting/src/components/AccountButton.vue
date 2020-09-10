@@ -85,9 +85,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import * as firebase from 'firebase/app'
-import 'firebase/auth'
 import { mdiAccount, mdiEye, mdiEyeOff } from '@mdi/js'
+import { auth } from '../utils/firebase'
 
 @Component
 export default class AccountButton extends Vue {
@@ -96,7 +95,6 @@ export default class AccountButton extends Vue {
   password: string = ''
   showPassword: boolean = false
   maxWidth = 450
-  auth = firebase.auth()
   userEmail = ''
   loading = false
 
@@ -111,13 +109,13 @@ export default class AccountButton extends Vue {
   }
 
   loginCheck() {
-    const currentUser = this.auth.currentUser
+    const currentUser = auth.currentUser
     if (currentUser !== null && currentUser.email !== null) this.userEmail = currentUser.email
   }
-  
+
   login() {
     this.loading = true
-    this.auth.signInWithEmailAndPassword(this.email, this.password).then(user => {
+    auth.signInWithEmailAndPassword(this.email, this.password).then(user => {
       this.loading = false
       this.dialog = false
     }).catch(err => {
@@ -127,7 +125,7 @@ export default class AccountButton extends Vue {
 
   logout() {
     this.loading = true
-    this.auth.signOut().then(() => {
+    auth.signOut().then(() => {
       this.userEmail = ''
       this.loading = false
     })
