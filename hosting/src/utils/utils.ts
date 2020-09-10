@@ -1,4 +1,4 @@
-export const getURLParam = (() => {
+export const getUrlParam = (() => {
   const params = new URL(window.location.href).searchParams
   return (key: string) => {
     const result = params.getAll(key)
