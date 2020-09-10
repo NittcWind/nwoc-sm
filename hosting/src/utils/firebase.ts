@@ -16,7 +16,9 @@ const firebaseConfig = {
   measurementId: "G-DSV75VNM3F"
 }
 firebase.initializeApp(firebaseConfig)
-firebase.analytics()
 
+export const analytics = firebase.analytics()
 export const firestore = firebase.firestore()
 export const auth = firebase.auth()
+
+analytics.logEvent('page_view', {})
