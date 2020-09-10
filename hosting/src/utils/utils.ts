@@ -1,9 +1,8 @@
 export const getUrlParam = (() => {
   const params = new URL(window.location.href).searchParams
   return (key: string) => {
-    const result = params.getAll(key)
-    if (result.length === 0) return null
-    if (result.length === 1) return result[0]
-    return result
+    const result = params.get(key)
+    if (result == null) return null
+    return window.decodeURIComponent(result)
   }
 })()
