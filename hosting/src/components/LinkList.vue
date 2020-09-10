@@ -28,7 +28,7 @@ export default class LinkList extends Vue {
     { link: '/pdf', title: '一覧を印刷する', subtitle: 'PDFをダウンロード', icon: mdiPdfBox },
     { link: '/csv', title: 'CSVで一覧を取得する', subtitle: 'Excelで閲覧できる形式', icon: mdiFileExcelBox },
     { link: '/backup', title: 'JSONで一覧を取得する', subtitle: '', icon: mdiJson },
-    { link: 'https://github.com/ssssota/nwoc-sm', title: 'Githubリポジトリ', subtitle: 'バグはこちらへ', icon: mdiGithubBox }
+    { link: 'https://github.com/nwoc/nwoc-sm', title: 'Githubリポジトリ', subtitle: 'バグはこちらへ', icon: mdiGithubBox }
   ]
 }
 </script>
