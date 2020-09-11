@@ -1,4 +1,4 @@
-export interface IScore {
+export type Score = {
   id: string
   name: string
   otherName?: string
@@ -8,9 +8,3 @@ export interface IScore {
   singer?: string
   note?: string
 }
-
-interface StringMap {
-  [key: string]: string
-}
-export interface IAdresses extends StringMap {}
-export interface IPublishers extends StringMap {}
