@@ -1,4 +1,5 @@
 import { firestore } from './firebase'
+import { Score } from '@/types'
 
 export const getUrlParam = (() => {
   const params = new URL(window.location.href).searchParams
@@ -19,8 +20,12 @@ export const addresses = firestore
     })
     return addresses
   })
+  .catch((err) => {
+    console.error('Cannot get addresses.', err)
+    return new Map<string, string>()
+  })
 
-export const publisers = firestore
+export const publishers = firestore
   .collection('publishers')
   .orderBy('name').get()
   .then(querySnapshot => {
@@ -29,4 +34,27 @@ export const publisers = firestore
       publishers.set(doc.id, doc.data().name)
     })
     return publishers
+  })
+  .catch((err) => {
+    console.error('Cannot get publishers.', err)
+    return new Map<string, string>()
+  })
+
+export const scores = firestore
+  .collection('scores').get()
+  .then(querySnapshot => {
+    const scores: Score[] = []
+    querySnapshot.forEach(async doc => {
+      const score = doc.data()
+      score.address = (await addresses).get(score.address.id) || ''
+      score.publisher = score.publisher
+        ? (await publishers).get(score.publisher.id)
+        : undefined
+      scores.push(Object.assign(score, { id: doc.id }) as Score)
+    })
+    return scores
+  })
+  .catch((err) => {
+    console.error('Cannot get scores.', err)
+    return [] as Score[]
   })
