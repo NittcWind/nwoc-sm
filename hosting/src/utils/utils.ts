@@ -25,6 +25,8 @@ export const addresses = firestore
     return new Map<string, string>()
   })
 
+export const addressNames = addresses.then(adrs => [...adrs.values()])
+
 export const publishers = firestore
   .collection('publishers')
   .orderBy('name').get()
@@ -39,6 +41,8 @@ export const publishers = firestore
     console.error('Cannot get publishers.', err)
     return new Map<string, string>()
   })
+
+export const publisherNames = publishers.then(pubs => [...pubs.values()])
 
 export const scores = firestore
   .collection('scores').get()
@@ -58,3 +62,11 @@ export const scores = firestore
     console.error('Cannot get scores.', err)
     return [] as Score[]
   })
+
+export const isRequire = (val: string) => !!val || '必須項目です。'
+
+export const lengthCheck = (formName: string, max: number, required: boolean = false) => {
+  return required
+    ? (val: string) => val.length <= max || `${formName}は${max}文字以内で入力してください。`
+    : (val: string) => (val.length === 0 || val.length <= max) || `${formName}は${max}文字以内で入力してください。`
+}
