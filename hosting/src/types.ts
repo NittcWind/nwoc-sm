@@ -8,3 +8,10 @@ export type Score = {
   singer?: string
   note?: string
 }
+
+export type IdNameRecord = {
+  id: string
+  name: string
+}
+
+export type ValidateResult = true | string
