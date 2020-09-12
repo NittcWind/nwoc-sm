@@ -5,11 +5,14 @@ Vue.use(Vuetify);
 
 // dark theme
 const mql = matchMedia('(prefers-color-scheme: dark)');
-mql.addEventListener('change', e => vuetify.framework.theme.dark = e.matches);
 
 const vuetify = new Vuetify({
   theme: { dark: mql.matches },
-  icons: { iconfont: 'mdiSvg' }
+  icons: { iconfont: 'mdiSvg' },
 });
+
+if (typeof mql.addEventListener === 'function') {
+  mql.addEventListener('change', (e) => { vuetify.framework.theme.dark = e.matches; });
+}
 
 export default vuetify;

@@ -1,6 +1,6 @@
 module.exports = {
-  "transpileDependencies": [
-    "vuetify"
+  transpileDependencies: [
+    'vuetify',
   ],
   pwa: {
     name: 'nwoc Score Manager',
@@ -9,7 +9,7 @@ module.exports = {
     appleMobileWebAppCapable: 'yes',
     appleMobileWebAppStatusBarStyle: 'black',
     manifestOptions: {
-      short_name: 'nwoc-sm'
-    }
-  }
-}
+      short_name: 'nwoc-sm',
+    },
+  },
+};
