@@ -4,6 +4,7 @@ import './registerServiceWorker'
 import vuetify from './plugins/vuetify'
 
 import './utils/firebase'
+import './utils/utils'
 
 Vue.config.productionTip = false
 
