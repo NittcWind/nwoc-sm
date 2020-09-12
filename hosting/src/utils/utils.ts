@@ -25,7 +25,7 @@ export const addresses = firestore
     return new Map<string, string>()
   })
 
-export const addressNames = addresses.then(adrs => [...adrs.values()])
+export const addressNames = addresses.then(adrs => [...adrs.values()] as const)
 
 export const publishers = firestore
   .collection('publishers')
@@ -42,7 +42,7 @@ export const publishers = firestore
     return new Map<string, string>()
   })
 
-export const publisherNames = publishers.then(pubs => [...pubs.values()])
+export const publisherNames = publishers.then(pubs => [...pubs.values()] as const)
 
 export const scores = firestore
   .collection('scores').get()
