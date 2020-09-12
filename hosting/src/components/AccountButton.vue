@@ -84,51 +84,48 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { mdiAccount, mdiEye, mdiEyeOff } from '@mdi/js'
-import { auth } from '../utils/firebase'
+import { Component, Vue } from 'vue-property-decorator';
+import { mdiAccount, mdiEye, mdiEyeOff } from '@mdi/js';
+import { isRequire } from '@/utils/utils';
+import { auth } from '@/utils/firebase';
 
 @Component
 export default class AccountButton extends Vue {
-  dialog: boolean = false
-  email: string = ''
-  password: string = ''
-  showPassword: boolean = false
+  dialog = false
+  email = ''
+  password = ''
+  showPassword = false
   maxWidth = 450
   userEmail = ''
   loading = false
-
   icons = {
     mdiAccount,
     mdiEye,
-    mdiEyeOff
+    mdiEyeOff,
+  }
+  required = isRequire
+
+  loginCheck(): void {
+    const { currentUser } = auth;
+    if (currentUser !== null && currentUser.email !== null) this.userEmail = currentUser.email;
   }
 
-  required(value: string) {
-    return !!value || 'Required'
+  login(): void {
+    this.loading = true;
+    auth.signInWithEmailAndPassword(this.email, this.password).then(() => {
+      this.loading = false;
+      this.dialog = false;
+    }).catch(() => {
+      this.loading = true;
+    });
   }
 
-  loginCheck() {
-    const currentUser = auth.currentUser
-    if (currentUser !== null && currentUser.email !== null) this.userEmail = currentUser.email
-  }
-
-  login() {
-    this.loading = true
-    auth.signInWithEmailAndPassword(this.email, this.password).then(user => {
-      this.loading = false
-      this.dialog = false
-    }).catch(err => {
-      this.loading = true
-    })
-  }
-
-  logout() {
-    this.loading = true
+  logout(): void {
+    this.loading = true;
     auth.signOut().then(() => {
-      this.userEmail = ''
-      this.loading = false
-    })
+      this.userEmail = '';
+      this.loading = false;
+    });
   }
 }
 </script>

@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Model, Vue } from 'vue-property-decorator'
-import { mdiSortDescending, mdiSortAscending } from '@mdi/js'
+import { Component, Model, Vue } from 'vue-property-decorator';
+import { mdiSortDescending, mdiSortAscending } from '@mdi/js';
 
 @Component
 export default class SortDescButton extends Vue {
@@ -22,7 +22,7 @@ export default class SortDescButton extends Vue {
 
   icons = {
     mdiSortDescending,
-    mdiSortAscending
+    mdiSortAscending,
   }
 }
 </script>
