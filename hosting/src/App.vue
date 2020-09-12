@@ -2,8 +2,8 @@
   <v-app>
     <v-navigation-drawer
       v-model="drawer"
-      app
-      bottom
+      fixed
+      temporary
     >
       <link-list />
     </v-navigation-drawer>
@@ -36,30 +36,30 @@
       <v-container
         fluid
       >
-        <score-list />
+        <score-table />
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-//import ScoreList from './components/ScoreList.vue'
-const ScoreList = () => import('./components/ScoreList.vue')
-//import AccountButton from './components/AccountButton.vue'
-const AccountButton = () => import('./components/AccountButton.vue')
-//import LinkList from './components/LinkList.vue'
-const LinkList = () => import('./components/LinkList.vue')
+import { Component, Vue } from 'vue-property-decorator';
+// import ScoreTable from './components/ScoreTable.vue'
+const ScoreTable = () => import('./components/ScoreTable.vue');
+// import AccountButton from './components/AccountButton.vue'
+const AccountButton = () => import('./components/AccountButton.vue');
+// import LinkList from './components/LinkList.vue'
+const LinkList = () => import('./components/LinkList.vue');
 
 @Component({
   components: {
-    ScoreList,
+    ScoreTable,
     AccountButton,
-    LinkList
-  }
+    LinkList,
+  },
 })
 export default class App extends Vue {
-  drawer: boolean = false
+  drawer = false
 }
 </script>
 
