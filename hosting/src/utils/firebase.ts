@@ -25,6 +25,6 @@ if (process.env.NODE_ENV === 'production') {
   analytics.logEvent('page_view', {});
 }
 
-firestore.enablePersistence({ experimentalTabSynchronization: true }).then(() => {
+firestore.enablePersistence({ synchronizeTabs: true }).then(() => {
   console.log('Cache enabled.');
 });
