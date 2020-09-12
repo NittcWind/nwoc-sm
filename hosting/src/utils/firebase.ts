@@ -24,3 +24,7 @@ export const auth = firebase.auth();
 if (process.env.NODE_ENV === 'production') {
   analytics.logEvent('page_view', {});
 }
+
+firestore.enablePersistence({ experimentalTabSynchronization: true }).then(() => {
+  console.log('Cache enabled.');
+});
