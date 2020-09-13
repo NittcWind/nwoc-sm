@@ -2,5 +2,6 @@
   "files.eol": "\n",
   "files.trimFinalNewlines": true,
   "files.insertFinalNewline": true,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true
 }
