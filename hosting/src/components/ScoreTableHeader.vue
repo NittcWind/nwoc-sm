@@ -67,8 +67,10 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mdiMagnify, mdiSort } from '@mdi/js';
-import SortDescButton from './SortDescButton.vue';
-import NewScoreButton from './NewScoreButton.vue';
+// import SortDescButton from './SortDescButton.vue';
+const SortDescButton = () => import('./SortDescButton.vue');
+// import NewScoreButton from './NewScoreButton.vue';
+const NewScoreButton = () => import('./NewScoreButton.vue');
 
 @Component({
   components: {

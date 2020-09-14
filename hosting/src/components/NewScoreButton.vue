@@ -21,7 +21,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mdiPlus } from '@mdi/js';
 import { Score } from '@/types';
 import { generateBlankScore } from '@/utils/utils';
-import EditDialog from './EditDialog.vue';
+// import EditDialog from './EditDialog.vue';
+const EditDialog = () => import('./EditDialog.vue');
 
 @Component({
   components: {

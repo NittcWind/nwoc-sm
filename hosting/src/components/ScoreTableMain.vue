@@ -98,8 +98,10 @@ import { Score } from '@/types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mdiPencil, mdiDelete } from '@mdi/js';
 import { generateBlankScore } from '@/utils/utils';
-import EditDialog from './EditDialog.vue';
-import DeleteDialog from './DeleteDialog.vue';
+// import EditDialog from './EditDialog.vue';
+const EditDialog = () => import('./EditDialog.vue');
+// import DeleteDialog from './DeleteDialog.vue';
+const DeleteDialog = () => import('./DeleteDialog.vue');
 
 @Component({
   components: {

@@ -32,8 +32,10 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { scores } from '@/utils/utils';
 import { Score } from '@/types';
-import ScoreTableHeader from './ScoreTableHeader.vue';
-import ScoreTableMain from './ScoreTableMain.vue';
+// import ScoreTableHeader from './ScoreTableHeader.vue';
+const ScoreTableHeader = () => import('./ScoreTableHeader.vue');
+// import ScoreTableMain from './ScoreTableMain.vue';
+const ScoreTableMain = () => import('./ScoreTableMain.vue');
 
 @Component({
   components: {
