@@ -9,6 +9,7 @@ module.exports = {
     '@vue/typescript/recommended',
   ],
   rules: {
+    'no-console': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'lines-between-class-members': 'off',
   },
