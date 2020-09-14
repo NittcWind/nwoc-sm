@@ -35,6 +35,7 @@
     <v-main>
       <v-container
         fluid
+        class="pb-12 mb-4"
       >
         <score-table />
       </v-container>
