@@ -110,7 +110,7 @@ const DeleteDialog = () => import('./DeleteDialog.vue');
   },
 })
 export default class ScoreTableMain extends Vue {
-  @Prop({ required: true }) scores!: Score[]
+  @Prop({ required: true, type: Array }) scores!: Score[]
   editItem: Score = generateBlankScore()
   editing = false
   deleteItem: Score = generateBlankScore()

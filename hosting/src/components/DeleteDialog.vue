@@ -39,7 +39,7 @@ import {
 
 @Component
 export default class DeleteDialog extends Vue {
-  @Prop({ required: true }) open!: boolean
+  @Prop({ required: true, type: Boolean }) open!: boolean
   @Prop() item?: Score
   maxWidth = 640
   name = ''

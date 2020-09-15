@@ -108,7 +108,7 @@ import { VForm } from 'vuetify/lib';
 
 @Component
 export default class EditDialog extends Vue {
-  @Prop({ required: true }) open!: boolean
+  @Prop({ required: true, type: Boolean }) open!: boolean
   @Prop({ required: true }) item?: Score
   @Ref() form!: typeof VForm
 
