@@ -29,6 +29,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { scores } from '@/utils/database';
 import { Score } from '@/types';
+import { getUrlParam } from '@/utils/utils';
 // import ScoreTableHeader from './ScoreTableHeader.vue';
 const ScoreTableHeader = () => import('./ScoreTableHeader.vue');
 // import ScoreTableMain from './ScoreTableMain.vue';
@@ -43,7 +44,7 @@ const ScoreTableMain = () => import('./ScoreTableMain.vue');
 export default class ScoreTable extends Vue {
   scores: Score[] = []
   loading = true
-  search = ''
+  search = getUrlParam('q') || ''
   sortBy = 'address'
   sortDesc = false
   itemsPerPage = 30

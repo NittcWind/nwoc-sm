@@ -57,7 +57,7 @@
 
 <script lang="ts">
 import {
-  Component, Prop, PropSync, Vue,
+  Component, Prop, PropSync, Vue, Watch,
 } from 'vue-property-decorator';
 import { mdiMagnify, mdiSort } from '@mdi/js';
 // import SortDescButton from './SortDescButton.vue';
@@ -94,6 +94,11 @@ export default class ScoreTableHeader extends Vue {
 
   get pcView(): boolean {
     return !this.$vuetify.breakpoint.smAndDown;
+  }
+
+  @Watch('syncedSearch')
+  querySetting(): void {
+    window.history.replaceState(null, '', `?q=${encodeURIComponent(this.syncedSearch)}`);
   }
 }
 </script>
