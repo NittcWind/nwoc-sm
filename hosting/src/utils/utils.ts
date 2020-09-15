@@ -113,14 +113,15 @@ export const saveScore = async (score: Score): Promise<void> => {
   const adrsRef = addressesRef.doc((await invAddresses).get(score.address));
   const pubsRef = score.publisher
     ? publishersRef.doc((await invPublishers).get(score.publisher))
-    : undefined;
+    : null;
 
   docRef.update('name', score.name.trim());
-  docRef.update('otherName', score.otherName?.trim());
+  docRef.update('otherName', score.otherName?.trim() ?? '');
   docRef.update('address', adrsRef);
-  docRef.update('publisher', !isKadaikyoku ? pubsRef : undefined);
-  docRef.update('singer', score.singer?.trim());
-  docRef.update('year', isKadaikyoku ? score.year : undefined);
+  docRef.update('publisher', !isKadaikyoku ? pubsRef : null);
+  docRef.update('singer', score.singer?.trim() ?? '');
+  docRef.update('year', isKadaikyoku ? score.year : null);
+  docRef.update('note', score.note?.trim() ?? '');
   docRef.update('updatedAt', firebase.firestore.FieldValue.serverTimestamp());
 };
 
