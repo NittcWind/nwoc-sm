@@ -106,6 +106,7 @@ import {
 } from '@/utils/database';
 import { VForm } from 'vuetify/lib';
 import { isRequire, lengthCheck } from '@/utils/utils';
+import { store } from '@/utils/store';
 
 @Component
 export default class EditDialog extends Vue {
@@ -156,7 +157,12 @@ export default class EditDialog extends Vue {
     if (!this.item || !this.valid) return;
     this.loading = true;
     saveScore(this.item)
-      .then(this.close)
+      .then((id) => {
+        if (!this.item) return;
+        this.item.id = id;
+        store.updateScore(this.item);
+        this.close();
+      })
       .catch((err: Error) => {
         console.error(err);
         this.errorMessage = err.message;

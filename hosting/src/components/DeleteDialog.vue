@@ -33,6 +33,7 @@
 <script lang="ts">
 import { Score } from '@/types';
 import { deleteScore } from '@/utils/database';
+import { store } from '@/utils/store';
 import {
   Component, Emit, Prop, Vue,
 } from 'vue-property-decorator';
@@ -51,11 +52,16 @@ export default class DeleteDialog extends Vue {
 
   del(): void {
     if (this.name === '' || this.name !== this.item?.name) return;
-    deleteScore(this.item).catch((err) => {
-      console.error(err);
-    }).finally(() => {
-      this.close();
-    });
+    deleteScore(this.item)
+      .then(() => {
+        if (!this.item) return;
+        store.deleteScore(this.item);
+      })
+      .catch((err) => {
+        console.error(err);
+      }).finally(() => {
+        this.close();
+      });
   }
 }
 </script>

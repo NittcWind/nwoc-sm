@@ -72,7 +72,7 @@ const NewScoreButton = () => import('./NewScoreButton.vue');
   },
 })
 export default class ScoreTableHeader extends Vue {
-  @PropSync('search', { required: true, type: String }) syncedSearch!: string
+  @PropSync('search', { required: true, default: '' }) syncedSearch!: string
   @PropSync('sortBy', { required: true, type: String }) syncedSortBy!: string
   @PropSync('sortDesc', { required: true, type: Boolean }) syncedSortDesc!: boolean
   @Prop({ required: true, type: Boolean }) loading!: boolean
