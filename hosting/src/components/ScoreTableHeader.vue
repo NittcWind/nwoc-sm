@@ -3,7 +3,7 @@
     <v-row>
       <v-col class="pa-1">
         <v-text-field
-          :value="search"
+          v-model="syncedSearch"
           clearable
           hide-details
           filled
@@ -11,46 +11,37 @@
           single-line
           :prepend-inner-icon="icons.mdiMagnify"
           label="Search"
-          @input="val => $emit('search-change', val)"
         />
       </v-col>
       <template v-if="pcView">
         <v-col cols="3" class="pa-1">
           <v-select
-            :value="sortBy"
+            v-model="syncedSortBy"
             dense
             filled
             hide-details
             :items="sortByItems"
             :prepend-inner-icon="icons.mdiSort"
-            @change="val => $emit('sort-by-change', val)"
           />
         </v-col>
         <v-col cols="1" class="pa-1">
-          <sort-desc-button
-            :value="sortDesc"
-            @change="val => $emit('sort-desc-change', val)"
-          />
+          <sort-desc-button v-model="syncedSortDesc" />
         </v-col>
       </template>
     </v-row>
     <v-row v-if="!pcView">
       <v-col class="pa-1">
         <v-select
-          :value="sortBy"
+          v-model="syncedSortBy"
           dense
           filled
           hide-details
           :items="sortByItems"
           :prepend-inner-icon="icons.mdiSort"
-          @change="val => $emit('sort-by-change', val)"
         />
       </v-col>
       <v-col cols="2" class="pa-1">
-        <sort-desc-button
-          :value="sortDesc"
-          @change="val => $emit('sort-desc-change', val)"
-        />
+        <sort-desc-button v-model="syncedSortDesc" />
       </v-col>
     </v-row>
     <v-progress-linear
@@ -65,7 +56,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import {
+  Component, Prop, PropSync, Vue,
+} from 'vue-property-decorator';
 import { mdiMagnify, mdiSort } from '@mdi/js';
 // import SortDescButton from './SortDescButton.vue';
 const SortDescButton = () => import('./SortDescButton.vue');
@@ -79,13 +72,10 @@ const NewScoreButton = () => import('./NewScoreButton.vue');
   },
 })
 export default class ScoreTableHeader extends Vue {
-  @Prop({ required: true }) search!: string
-
-  @Prop({ required: true }) sortBy!: string
-
+  @PropSync('search', { required: true }) syncedSearch!: string
+  @PropSync('sortBy', { required: true }) syncedSortBy!: string
+  @PropSync('sortDesc', { required: true }) syncedSortDesc!: boolean
   @Prop({ required: true }) loading!: boolean
-
-  @Prop({ required: true }) sortDesc!: boolean
 
   sortByItems = [
     { text: '名称', value: 'name' },

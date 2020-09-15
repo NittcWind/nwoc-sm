@@ -1,7 +1,7 @@
 <template>
   <v-btn
     icon
-    @click="$emit('change', !value)"
+    @click="change"
   >
     <v-icon v-if="value">
       {{ icons.mdiSortDescending }}
@@ -13,16 +13,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Model, Vue } from 'vue-property-decorator';
+import {
+  Component, Emit, Model, Vue,
+} from 'vue-property-decorator';
 import { mdiSortDescending, mdiSortAscending } from '@mdi/js';
 
 @Component
 export default class SortDescButton extends Vue {
-  @Model('change', { required: true }) value!: boolean;
+  @Model('change', { required: true, type: Boolean }) value!: boolean;
 
   icons = {
     mdiSortDescending,
     mdiSortAscending,
+  }
+
+  @Emit()
+  change(): boolean {
+    return !this.value;
   }
 }
 </script>

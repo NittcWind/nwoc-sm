@@ -11,12 +11,9 @@
     <template v-slot:header>
       <score-table-header
         :loading="loading"
-        :search="search"
-        @search-change="val => search = val"
-        :sort-by="sortBy"
-        @sort-by-change="val => sortBy = val"
-        :sort-desc="sortDesc"
-        @sort-desc-change="val => sortDesc = val"
+        :search.sync="search"
+        :sort-by.sync="sortBy"
+        :sort-desc.sync="sortDesc"
       />
     </template>
 

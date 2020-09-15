@@ -33,7 +33,9 @@
 <script lang="ts">
 import { Score } from '@/types';
 import { deleteScore } from '@/utils/utils';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import {
+  Component, Emit, Prop, Vue,
+} from 'vue-property-decorator';
 
 @Component
 export default class DeleteDialog extends Vue {
@@ -42,10 +44,11 @@ export default class DeleteDialog extends Vue {
   maxWidth = 640
   name = ''
 
+  @Emit()
   close(): void {
-    this.$emit('close');
     this.name = '';
   }
+
   del(): void {
     if (this.name === '' || this.name !== this.item?.name) return;
     deleteScore(this.item).catch((err) => {

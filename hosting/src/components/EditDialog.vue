@@ -98,17 +98,19 @@
 
 <script lang="ts">
 import {
-  Component, Prop, Vue, Watch,
+  Component, Emit, Prop, Ref, Vue, Watch,
 } from 'vue-property-decorator';
 import { IdNameRecord, Score, ValidateResult } from '@/types';
 import {
   addresses, isRequire, lengthCheck, publishers, saveScore,
 } from '@/utils/utils';
+import { VForm } from 'vuetify/lib';
 
 @Component
 export default class EditDialog extends Vue {
   @Prop({ required: true }) open!: boolean
   @Prop({ required: true }) item?: Score
+  @Ref() form!: typeof VForm
 
   maxWidth = 640
   valid = false
@@ -129,7 +131,7 @@ export default class EditDialog extends Vue {
 
   @Watch('open')
   resetValidation(): void {
-    const form = this.$refs.form as unknown as Record<string, unknown> | undefined;
+    const form = this.form as unknown as Record<string, unknown> | undefined;
     if (typeof form?.resetValidation === 'function') {
       form.resetValidation();
     }
@@ -139,8 +141,8 @@ export default class EditDialog extends Vue {
     return this.item?.address === '課題曲';
   }
 
+  @Emit()
   close(): void {
-    this.$emit('close');
     this.errorMessage = '';
   }
 
