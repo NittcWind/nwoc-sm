@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { Score } from '@/types';
-import { deleteScore } from '@/utils/utils';
+import { deleteScore } from '@/utils/database';
 import {
   Component, Emit, Prop, Vue,
 } from 'vue-property-decorator';

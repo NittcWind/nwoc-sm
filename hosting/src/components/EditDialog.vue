@@ -102,9 +102,10 @@ import {
 } from 'vue-property-decorator';
 import { IdNameRecord, Score, ValidateResult } from '@/types';
 import {
-  addresses, isRequire, lengthCheck, publishers, saveScore,
-} from '@/utils/utils';
+  addresses, publishers, saveScore,
+} from '@/utils/database';
 import { VForm } from 'vuetify/lib';
+import { isRequire, lengthCheck } from '@/utils/utils';
 
 @Component
 export default class EditDialog extends Vue {

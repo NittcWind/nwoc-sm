@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { scores } from '@/utils/utils';
+import { scores } from '@/utils/database';
 import { Score } from '@/types';
 // import ScoreTableHeader from './ScoreTableHeader.vue';
 const ScoreTableHeader = () => import('./ScoreTableHeader.vue');

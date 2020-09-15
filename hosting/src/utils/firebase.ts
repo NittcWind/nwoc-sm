@@ -4,6 +4,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/analytics';
+import { isProduction } from './utils';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDWETpArGNX_ga7Su-K3JjNrOGkT78DxRA',
@@ -21,7 +22,7 @@ export const analytics = firebase.analytics();
 export const firestore = firebase.firestore();
 export const auth = firebase.auth();
 
-if (process.env.NODE_ENV === 'production') {
+if (isProduction) {
   analytics.logEvent('page_view', {});
 }
 
