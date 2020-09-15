@@ -88,13 +88,12 @@ export const scores = scoresRef
     return [] as Score[];
   });
 
-export const saveScore = async (score: Score): Promise<void> => {
-  let docRef;
+export const saveScore = async (score: Score): Promise<string> => {
+  let docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>;
   if (score.id === '') {
     docRef = await scoresRef.add({
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
-    if (!docRef) return;
   } else {
     docRef = scoresRef.doc(score.id);
   }
@@ -105,14 +104,17 @@ export const saveScore = async (score: Score): Promise<void> => {
     ? publishersRef.doc((await invPublishers).get(score.publisher))
     : null;
 
-  docRef.update('name', score.name.trim());
-  docRef.update('otherName', score.otherName?.trim() ?? '');
-  docRef.update('address', adrsRef);
-  docRef.update('publisher', !isKadaikyoku ? pubsRef : null);
-  docRef.update('singer', score.singer?.trim() ?? '');
-  docRef.update('year', isKadaikyoku ? score.year : null);
-  docRef.update('note', score.note?.trim() ?? '');
-  docRef.update('updatedAt', firebase.firestore.FieldValue.serverTimestamp());
+  await Promise.all([
+    docRef.update('name', score.name.trim()),
+    docRef.update('otherName', score.otherName?.trim() ?? ''),
+    docRef.update('address', adrsRef),
+    docRef.update('publisher', !isKadaikyoku ? pubsRef : null),
+    docRef.update('singer', score.singer?.trim() ?? ''),
+    docRef.update('year', isKadaikyoku ? score.year : null),
+    docRef.update('note', score.note?.trim() ?? ''),
+    docRef.update('updatedAt', firebase.firestore.FieldValue.serverTimestamp()),
+  ]);
+  return Promise.resolve(docRef.id);
 };
 
 export const deleteScore = async (score: Score): Promise<void> => scoresRef.doc(score.id).delete();
