@@ -1,42 +1,16 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-model="drawer"
-      fixed
-      temporary
-    >
-      <link-list />
-    </v-navigation-drawer>
-    <v-app-bar
-      app
-    >
-      <v-btn
-        name="open menu"
-        icon
-        text
-        @click="drawer = !drawer"
-      >
-        <v-img
-          src="./assets/logo.color.svg"
-          height="32"
-          contain
-        />
+    <v-app-bar app flat dense>
+      <v-btn name="open menu" icon text @click="drawer = !drawer">
+        <v-img src="./assets/logo.color.svg" height="32" contain />
       </v-btn>
-      <v-toolbar-title
-        class="pa-0"
-      >
-        Score Manager
-      </v-toolbar-title>
-      <v-spacer>
-      </v-spacer>
+      <v-toolbar-title class="pa-0">Score Manager</v-toolbar-title>
+      <v-spacer />
       <account-button />
     </v-app-bar>
 
     <v-main>
-      <v-container
-        fluid
-        class="pb-12 mb-4"
-      >
+      <v-container fluid class="pb-12 mb-4">
         <score-table />
       </v-container>
     </v-main>
@@ -60,13 +34,13 @@ const LinkList = () => import('./components/LinkList.vue');
   },
 })
 export default class App extends Vue {
-  drawer = false
+  drawer = false;
 }
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP|Roboto&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Noto+Sans+JP|Roboto&display=swap");
 .v-application *:not(.v-icon) {
-  font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+  font-family: "Roboto", "Noto Sans JP", sans-serif;
 }
 </style>
