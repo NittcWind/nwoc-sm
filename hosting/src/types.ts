@@ -16,7 +16,7 @@ export type IdNameRecord = {
 
 export type ValidateResult = true | string
 
-export type ScoreProps = {
+export type ScoreProp = {
   text: string
   propName: string
   cols: number
