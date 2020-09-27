@@ -6,6 +6,7 @@
       </v-btn>
       <v-toolbar-title class="pa-0">Score Manager</v-toolbar-title>
       <v-spacer />
+      <move-print-button />
       <account-button />
     </v-app-bar>
 
@@ -21,14 +22,14 @@
 import { Component, Vue } from 'vue-property-decorator';
 
 const ScoreTable = () => import(/* webpackChunkName: "home" */ '@/components/ScoreTable.vue');
+const MovePrintButton = () => import(/* webpackChunkName: "home" */ '@/components/MovePrintButton.vue');
 const AccountButton = () => import(/* webpackChunkName: "home" */ '@/components/AccountButton.vue');
-const LinkList = () => import(/* webpackChunkName: "home" */ '@/components/LinkList.vue');
 
 @Component({
   components: {
     ScoreTable,
+    MovePrintButton,
     AccountButton,
-    LinkList,
   },
 })
 export default class App extends Vue {
