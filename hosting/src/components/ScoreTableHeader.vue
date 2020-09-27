@@ -65,7 +65,7 @@ import {
 } from 'vue-property-decorator';
 import { mdiMagnify, mdiSort } from '@mdi/js';
 import { scoreProps } from '@/utils/constants';
-import { ScoreProps } from '@/types';
+import { ScoreProp } from '@/types';
 // import SortDescButton from './SortDescButton.vue';
 const SortDescButton = () => import('./SortDescButton.vue');
 // import NewScoreButton from './NewScoreButton.vue';
@@ -84,7 +84,7 @@ export default class ScoreTableHeader extends Vue {
   @Prop({ required: true, type: Boolean }) loading!: boolean
 
   // eslint-disable-next-line class-methods-use-this
-  get sortByItems(): ScoreProps[] {
+  get sortByItems(): ScoreProp[] {
     return scoreProps;
   }
 

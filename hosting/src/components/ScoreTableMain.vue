@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { Score, ScoreProps } from '@/types';
+import { Score, ScoreProp } from '@/types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mdiPencil, mdiDelete } from '@mdi/js';
 import { generateBlankScore } from '@/utils/utils';
@@ -118,7 +118,7 @@ export default class ScoreTableMain extends Vue {
   deleting = false
 
   // eslint-disable-next-line class-methods-use-this
-  get itemInfos(): ScoreProps[] {
+  get itemInfos(): ScoreProp[] {
     return scoreProps;
   }
 
