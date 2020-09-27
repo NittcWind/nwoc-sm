@@ -1,7 +1,7 @@
-import { ScoreProps } from '@/types';
+import { ScoreProp } from '@/types';
 
 // eslint-disable-next-line import/prefer-default-export
-export const scoreProps: ScoreProps[] = [
+export const scoreProps: ScoreProp[] = [
   {
     text: '名称', propName: 'name', cols: 3, pcOnly: true,
   },
