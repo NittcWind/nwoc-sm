@@ -94,10 +94,11 @@
 </template>
 
 <script lang="ts">
-import { Score } from '@/types';
+import { Score, ScoreProps } from '@/types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mdiPencil, mdiDelete } from '@mdi/js';
 import { generateBlankScore } from '@/utils/utils';
+import { scoreProps } from '@/utils/constants';
 // import EditDialog from './EditDialog.vue';
 const EditDialog = () => import('./EditDialog.vue');
 // import DeleteDialog from './DeleteDialog.vue';
@@ -116,17 +117,11 @@ export default class ScoreTableMain extends Vue {
   deleteItem: Score = generateBlankScore()
   deleting = false
 
-  itemInfos = [
-    {
-      text: '名称', propName: 'name', cols: 3, pcOnly: true,
-    },
-    { text: '別名', propName: 'otherName', cols: 2 },
-    { text: '保管場所', propName: 'address', cols: 1 },
-    { text: '年', propName: 'year', cols: 1 },
-    { text: '出版社', propName: 'publisher', cols: 1 },
-    { text: 'アーティスト', propName: 'singer', cols: 1 },
-    { text: '備考', propName: 'note', cols: 3 },
-  ]
+  // eslint-disable-next-line class-methods-use-this
+  get itemInfos(): ScoreProps[] {
+    return scoreProps;
+  }
+
   icons = {
     mdiPencil,
     mdiDelete,

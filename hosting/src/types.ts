@@ -15,3 +15,10 @@ export type IdNameRecord = {
 }
 
 export type ValidateResult = true | string
+
+export type ScoreProps = {
+  text: string
+  propName: string
+  cols: number
+  pcOnly?: boolean
+}

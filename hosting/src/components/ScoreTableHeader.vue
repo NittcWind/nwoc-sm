@@ -20,6 +20,8 @@
             dense
             filled
             hide-details
+            item-text="text"
+            item-value="propName"
             :items="sortByItems"
             :prepend-inner-icon="icons.mdiSort"
           />
@@ -36,6 +38,8 @@
           dense
           filled
           hide-details
+          item-text="text"
+          item-value="propName"
           :items="sortByItems"
           :prepend-inner-icon="icons.mdiSort"
         />
@@ -60,6 +64,8 @@ import {
   Component, Prop, PropSync, Vue, Watch,
 } from 'vue-property-decorator';
 import { mdiMagnify, mdiSort } from '@mdi/js';
+import { scoreProps } from '@/utils/constants';
+import { ScoreProps } from '@/types';
 // import SortDescButton from './SortDescButton.vue';
 const SortDescButton = () => import('./SortDescButton.vue');
 // import NewScoreButton from './NewScoreButton.vue';
@@ -77,15 +83,10 @@ export default class ScoreTableHeader extends Vue {
   @PropSync('sortDesc', { required: true, type: Boolean }) syncedSortDesc!: boolean
   @Prop({ required: true, type: Boolean }) loading!: boolean
 
-  sortByItems = [
-    { text: '名称', value: 'name' },
-    { text: '別名', value: 'otherName' },
-    { text: '保管場所', value: 'address' },
-    { text: '年', value: 'year' },
-    { text: '出版社', value: 'publisher' },
-    { text: 'アーティスト', value: 'singer' },
-    { text: '備考', value: 'note' },
-  ]
+  // eslint-disable-next-line class-methods-use-this
+  get sortByItems(): ScoreProps[] {
+    return scoreProps;
+  }
 
   icons = {
     mdiMagnify,
