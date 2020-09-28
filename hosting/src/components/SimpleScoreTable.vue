@@ -12,8 +12,15 @@
     </thead>
     <tbody>
       <tr v-for="score in scores" :key="score.id">
-        <td v-for="prop in scoreProps" :key="prop.propName">
-          {{ score[prop.propName] }}
+        <td
+          v-for="prop in scoreProps"
+          :key="prop.propName"
+          :class="{ align: (prop.propName === 'year' || prop.propName === 'address') }"
+        >
+          <pre v-if="prop.propName === 'note'" v-text="score[prop.propName]" />
+          <template v-else>
+            {{ score[prop.propName] }}
+          </template>
         </td>
       </tr>
     </tbody>
@@ -46,10 +53,22 @@ thead tr {
 }
 tr {
   display: grid;
-  grid-template-columns: 4fr 3fr 1fr 1fr 2fr 2fr 4fr;
+  grid-template-columns:
+    minmax(0, 4fr) minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr)
+    minmax(0, 2fr) minmax(0, 2fr) minmax(0, 4fr);
 
   border-bottom: 1px solid #ccc;
   page-break-inside: avoid;
+
+  .align {
+    text-align: center;
+  }
+  pre {
+    font-family: inherit;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
 }
 
 @media print {
