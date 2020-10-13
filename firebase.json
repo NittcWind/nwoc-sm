@@ -6,10 +6,10 @@
   "hosting": {
     "public": "hosting/dist",
     "rewrites": [
-      { "source": "/backup", "function": "backup" },
-      { "source": "/json", "function": "json" },
-      { "source": "/csv", "function": "csv" },
-      { "source": "/pdf", "function": "pdf" }
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ],
     "ignore": [
       "firebase.json",
