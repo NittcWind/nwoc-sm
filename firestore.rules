@@ -22,13 +22,8 @@ service cloud.firestore {
       allow create: if isAdmin();
     }
     match /scores/{scoreId} {
-      allow create, update:
-        if isAdmin() &&
-          validateString(incomingData().name, 1, 100) &&
-          validateString(incomingData().otherName, 0, 100) &&
-          validateString(incomingData().singer, 0, 100) &&
-          validateString(incomingData().note, 0, 500);
-      allow delete: if isAdmin();
+      allow read;
+      allow write: if isAdmin();
     }
   }
 }
