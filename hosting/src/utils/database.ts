@@ -12,8 +12,8 @@ export const addresses = addressesRef
   .orderBy('address')
   .get({
     source: isProduction
-      ? 'cache'
-      : 'server',
+      ? 'server'
+      : 'cache',
   })
   .catch((err) => {
     console.warn('Cache has no addresses', err);
@@ -37,8 +37,8 @@ export const publishers = publishersRef
   .orderBy('name')
   .get({
     source: isProduction
-      ? 'cache'
-      : 'server',
+      ? 'server'
+      : 'cache',
   })
   .catch((err) => {
     console.warn('Cache has no pulishers', err);
