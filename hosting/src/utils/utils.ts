@@ -18,11 +18,11 @@ export const lengthCheck = (
   max: number,
   required = false,
 ): (
-  (val: string) => string | true
+  (val: string) => ValidateResult
 ) => (
   required
-    ? (val: string) => (!!val && val.length <= max) || `${formName}は${max}文字以内で入力してください。`
-    : (val: string) => (!!val && (val.length === 0 || val.length <= max)) || `${formName}は${max}文字以内で入力してください。`
+    ? (val: string) => (val.length <= max) || `${formName}は${max}文字以内で入力してください。`
+    : (val: string) => ((val.length === 0 || val.length <= max)) || `${formName}は${max}文字以内で入力してください。`
 );
 
 export const generateBlankScore = (): Score => ({
