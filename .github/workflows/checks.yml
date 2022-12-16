@@ -6,6 +6,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hosting
     strategy:
       matrix:
         node-version: [12.x]
