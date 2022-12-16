@@ -11,7 +11,7 @@ jobs:
         working-directory: hosting
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [16.x]
         command:
           - npm run build
           - npm run lint
